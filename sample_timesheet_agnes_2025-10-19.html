@@ -1469,8 +1469,27 @@ body:not(.is-editing) .title-menu-toggle {
       min-width: 120px;
     }
 
+    .signature-card .value.signature-with-pad {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+
     .signature-pad-wrapper {
+      display: none !important;
       width: 100%;
+    }
+
+    .signature-preview {
+      display: none;
+      margin-left: 0;
+      max-height: 32px;
+      max-width: 180px;
+    }
+
+    .signature-preview.is-visible {
+      display: inline-block !important;
     }
   }
 
