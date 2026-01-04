@@ -1302,7 +1302,7 @@ body:not(.is-editing) .title-menu-toggle {
       margin: 0;
       background: #fff;
       -webkit-print-color-adjust: exact;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     body::before,
@@ -1340,7 +1340,7 @@ body:not(.is-editing) .title-menu-toggle {
     .page {
       width: calc(210mm - 8mm);
       max-width: 800px;
-      margin: 4mm auto;
+      margin: 2mm auto;
       min-height: auto;
       box-shadow: none;
       border-radius: 14px;
@@ -1349,19 +1349,29 @@ body:not(.is-editing) .title-menu-toggle {
     body.page-a3 .page {
       width: calc(297mm - 8mm);
       max-width: 1080px;
-      margin: 4mm auto;
+      margin: 2mm auto;
     }
 
     .sheet-header {
-      padding: 28px 24px 12px;
+      padding: 20px 24px 8px;
+    }
+
+    .title-bar {
+      margin: 8px 0 10px;
+    }
+
+    .title-bar h1 {
+      font-size: 18px;
+      padding: 8px 28px;
     }
 
     .info-table {
-      font-size: 12px;
+      margin: 18px 0 16px;
+      font-size: 11px;
     }
 
     .info-table td {
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-color: #000;
     }
 
@@ -1399,29 +1409,40 @@ body:not(.is-editing) .title-menu-toggle {
     }
 
     .document {
-      padding: 0 28px 6px;
+      padding: 0 24px 4px;
     }
 
     .sheet-footer {
-      padding: 6px 28px 0;
+      padding: 4px 24px 0;
     }
 
     .table-scroll {
       overflow: visible !important;
     }
 
+    .timesheet-table th,
+    .timesheet-table td {
+      font-size: 11px;
+      padding: 6px 8px;
+    }
+
+    .shift-entry span {
+      min-width: 64px;
+      font-size: 11px;
+    }
+
     .signatures {
       page-break-inside: avoid;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-      margin: 14px 0 6px;
+      gap: 10px;
+      margin: 10px 0 4px;
     }
 
     .signature-card {
       border: 2px solid var(--border);
       border-radius: 12px;
-      padding: 18px 22px;
+      padding: 14px 18px;
     }
 
     .signature-card .row {
@@ -1429,7 +1450,7 @@ body:not(.is-editing) .title-menu-toggle {
       align-items: center;
       justify-content: flex-start;
       gap: 6px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .signature-card .row:last-child {
