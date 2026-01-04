@@ -1,0 +1,45 @@
+{
+  "org": {
+    "website": "www.aimexhomecareservices.com",
+    "phone": "202-868-2214",
+    "email": "info@aimexhomecareservices.com",
+    "address_lines": [
+      "13215 Whiteholm Drive",
+      "Upper Marlboro, Maryland 20774"
+    ],
+    "service_areas": [
+      "Montgomery County",
+      "Prince George County."
+    ]
+  },
+  "timesheet_fields": {
+    "client_name": "string",
+    "employee_name": "string",
+    "employee_title": "string",
+    "employee_titles": [
+      "optional array of strings for multi-role employees"
+    ],
+    "week_start": "MM/DD/YYYY or MM-DD-YYYY",
+    "week_end": "MM/DD/YYYY or MM-DD-YYYY",
+    "entries": [
+      {
+        "day": "Sunday|Monday|...",
+        "date": "MM-DD-YYYY",
+        "shifts": [
+          {
+            "start": "hh:mmAM/PM",
+            "end": "hh:mmAM/PM",
+            "hours": "decimal"
+          }
+        ],
+        "notes": "optional string"
+      }
+    ],
+    "signatures": {
+      "employee_signature": "string (name)",
+      "employee_signature_date": "MM-DD-YYYY",
+      "supervisor_signature": "string (name)",
+      "supervisor_signature_date": "MM-DD-YYYY"
+    }
+  }
+}

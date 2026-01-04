@@ -1,0 +1,10 @@
+.vscode/
+ngrok/
+ngrok.zip
+ngrok.err
+ngrok.log
+ngrok.out
+ngrok_session.log
+*.log
+*.err
+*.out

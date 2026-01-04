@@ -1,0 +1,25 @@
+{
+  "client_name": "",
+  "employee_name": "",
+  "employee_title": "",
+  "employee_titles": [],
+  "week_start": "",
+  "week_end": "",
+  "entries": [
+    { "day": "Sunday", "date": "", "shifts": [] },
+    { "day": "Monday", "date": "", "shifts": [] },
+    { "day": "Tuesday", "date": "", "shifts": [] },
+    { "day": "Wednesday", "date": "", "shifts": [] },
+    { "day": "Thursday", "date": "", "shifts": [] },
+    { "day": "Friday", "date": "", "shifts": [] },
+    { "day": "Saturday", "date": "", "shifts": [] }
+  ],
+  "signatures": {
+    "employee_signature": "",
+    "employee_signature_date": "",
+    "supervisor_signature": "",
+    "supervisor_signature_date": ""
+  },
+  "employee_email": "",
+  "employee_phone": ""
+}

@@ -1,0 +1,3180 @@
+2 <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Employee Weekly Timesheet</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Playfair+Display:wght@600;700&display=swap");
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+  :root {
+    --purple: #2d2964;
+    --orange: #f7941d;
+    --orange-dark: #f26d21;
+    --gray-text: #191919;
+    --border: #1b1b1b;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Montserrat", Arial, sans-serif;
+    background: #eef1f8;
+    color: var(--gray-text);
+  }
+
+  .controls {
+    position: fixed;
+    top: 18px;
+    right: 24px;
+    display: flex;
+    gap: 10px;
+    z-index: 50;
+  }
+
+  .controls button {
+    appearance: none;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--purple);
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(45, 41, 100, 0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .controls #togglePageSize {
+    background: #45408d;
+    box-shadow: 0 10px 22px rgba(69, 64, 141, 0.3);
+  }
+
+  .controls #togglePageSize[aria-pressed="true"] {
+    background: var(--orange-dark);
+    box-shadow: 0 10px 22px rgba(242, 109, 33, 0.3);
+  }
+
+  .controls #printSheet {
+    background: var(--orange);
+    box-shadow: 0 10px 22px rgba(242, 109, 33, 0.35);
+  }
+
+  .controls button:hover {
+    transform: translateY(-1px);
+  }
+
+  .controls button:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  .page {
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 860px);
+    min-height: 1125px;
+    margin: 48px auto 64px;
+    background: #fff;
+    box-shadow: 0 28px 60px rgba(28, 34, 68, 0.26);
+    border-radius: 14px;
+    border: 2px solid rgba(17, 25, 58, 0.12);
+    overflow: visible;
+    position: relative;
+  }
+
+  body.page-a3 .page {
+    width: min(100%, 1120px);
+  }
+
+  .sheet-header {
+    position: relative;
+    padding: 32px 36px 12px;
+    background: #fff;
+  }
+
+  .header-art {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(23, 24, 58, 0.22);
+  }
+
+  .header-art img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 0;
+  }
+
+  .document {
+    flex: 1 1 auto;
+    padding: 0 48px;
+    padding-bottom: 52px;
+  }
+
+  .title-bar {
+    margin-top: 16px;
+    text-align: center;
+  }
+
+  .title-bar h1 {
+    display: inline-block;
+    padding: 12px 38px;
+    margin: 0;
+    border: 2px solid var(--border);
+    font-size: 20px;
+    letter-spacing: 0.14em;
+  }
+
+  .info-table {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-collapse: collapse;
+    margin: 26px 0 22px;
+    font-size: 13px;
+    table-layout: fixed;
+    background: #fff;
+  }
+
+  .info-table tr {
+    background: transparent;
+  }
+
+  .info-table td {
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    vertical-align: middle;
+  }
+
+.info-table td.label {
+    width: 18%;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: rgba(45, 41, 100, 0.05);
+  }
+
+  .info-table td.value {
+    font-weight: 600;
+    position: relative;
+    word-break: break-word;
+  }
+
+.title-field {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.title-controls {
+  position: relative;
+  width: 100%;
+}
+
+.title-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.title-menu-toggle {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gray-text);
+  background: linear-gradient(145deg, #ffffff, #f4f6ff);
+  box-shadow: 0 16px 28px rgba(45, 41, 100, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.title-menu-label {
+  flex: 1 1 auto;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.title-menu-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 41, 100, 0.22);
+}
+
+.title-menu-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.title-menu-caret {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(45, 41, 100, 0.4);
+  border-top-color: transparent;
+  border-left-color: transparent;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.title-select-wrapper.is-open .title-menu-caret {
+  transform: rotate(-135deg);
+}
+
+.title-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(45, 41, 100, 0.12);
+  box-shadow: 0 24px 45px rgba(18, 20, 52, 0.25);
+  padding: 10px;
+  display: none;
+  z-index: 20;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.title-select-wrapper.is-open .title-menu {
+  display: block;
+}
+
+.title-menu-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--gray-text);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.title-menu-item-label {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.title-menu-item:not(:last-child) {
+  margin-bottom: 4px;
+}
+
+.title-menu-item:hover {
+  background: rgba(45, 41, 100, 0.08);
+}
+
+.title-menu-item.is-active {
+  background: rgba(45, 41, 100, 0.14);
+  color: var(--purple);
+}
+
+.title-menu-item-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(45, 41, 100, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  background: transparent;
+}
+
+.title-menu-item.is-active .title-menu-item-check {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: #fff;
+}
+
+.title-menu-empty {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(25, 25, 25, 0.6);
+  padding: 18px 0;
+}
+
+.title-native-select {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.title-controls select,
+.title-clear {
+  width: 100%;
+}
+
+  .title-display {
+    min-height: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .title-display.is-empty {
+    color: rgba(25, 25, 25, 0.55);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .title-chip {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(45, 41, 100, 0.08);
+    color: var(--purple);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px rgba(45, 41, 100, 0.12);
+  }
+
+  .title-controls {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .title-controls select {
+    appearance: none;
+    padding: 10px 48px 10px 18px;
+    border-radius: 999px;
+    border: 2px solid rgba(45, 41, 100, 0.14);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-text);
+    background: linear-gradient(145deg, #ffffff, #f6f7fb);
+    position: relative;
+    box-shadow: 0 14px 24px rgba(28, 34, 68, 0.14);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+  }
+
+  .title-controls select option {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    background: #fff;
+    color: var(--gray-text);
+  }
+
+  .title-controls select:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: 0 16px 28px rgba(247, 148, 29, 0.22);
+    transform: translateY(-1px);
+  }
+
+  .title-controls select:hover {
+    transform: translateY(-1px);
+    border-color: rgba(45, 41, 100, 0.3);
+  }
+
+  .title-controls select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 6px 12px rgba(28, 34, 68, 0.08);
+  }
+
+.title-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+}
+
+  .title-select-wrapper::after {
+    content: "";
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-25%);
+    pointer-events: none;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid var(--purple);
+  }
+
+  .title-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    background: linear-gradient(135deg, rgba(45, 41, 100, 0.08), rgba(45, 41, 100, 0.14));
+    color: var(--purple);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  }
+
+  .title-clear:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, rgba(45, 41, 100, 0.12), rgba(45, 41, 100, 0.18));
+  }
+
+  .title-clear:active {
+    transform: translateY(0);
+  }
+
+  .title-clear:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  [data-uppercase="true"] {
+    text-transform: uppercase;
+  }
+
+  .info-table td.value span[data-week-start],
+  .info-table td.value span[data-week-end] {
+    display: inline-block;
+    min-width: 110px;
+  }
+
+  .signature-section-scroll {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 12px;
+  }
+
+.contact-entry {
+  font-weight: 600;
+}
+
+.contact-lines {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  padding: 0;
+}
+
+.contact-line {
+  display: grid;
+  grid-template-columns: min-content minmax(0, 1fr) min-content minmax(0, 1.4fr);
+  column-gap: 4px;
+  align-items: end;
+}
+
+.contact-line .contact-label {
+  min-width: 0;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dash-field {
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+  border-bottom: 2px dotted var(--border);
+  padding-bottom: 2px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.dash-field--short,
+.dash-field--long {
+  max-width: 100%;
+}
+
+.dash-field span[data-editable] {
+  display: inline-block;
+  min-width: 12px;
+  padding-right: 6px;
+  background: #fff;
+}
+
+.info-table tr.contact-lines-row td {
+  padding: 10px 14px 12px;
+  background: #fff;
+}
+
+.signature-section-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+  .info-table-scroll {
+    width: 100%;
+    overflow-x: visible;
+  }
+
+  .date-input {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  .timesheet-table {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .timesheet-table th,
+  .timesheet-table td {
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .timesheet-table th {
+    background: #f3f3f3;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 12.5px;
+  }
+
+  .timesheet-table td.hours {
+    width: 95px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .timesheet-table td[data-date-cell="true"] {
+    min-width: 140px;
+    white-space: nowrap;
+  }
+
+  .timesheet-table tbody tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .timesheet-table tbody td span[data-editable] {
+    display: inline-block;
+    min-width: 20px;
+  }
+
+  .shift-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 24px;
+  }
+
+  .shift-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+
+  .shift-entry span {
+    min-width: 88px;
+    display: inline-block;
+    font-weight: 600;
+    color: var(--gray-text);
+  }
+
+  .shift-entry span.is-empty {
+    color: #a6abb8;
+    font-style: italic;
+  }
+
+  body.is-editing .shift-entry span {
+    cursor: pointer;
+    border-bottom: 1px dashed rgba(45, 41, 100, 0.35);
+  }
+
+  .date-picker {
+    position: absolute;
+    z-index: 60;
+    display: none;
+    width: 260px;
+    background: #fff;
+    border: 1px solid rgba(45, 41, 100, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(17, 25, 58, 0.25);
+    padding: 16px 18px;
+  }
+
+  .date-picker.active {
+    display: block;
+  }
+
+  .date-picker__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .date-picker__title {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  .date-picker__nav {
+    display: inline-flex;
+    gap: 8px;
+  }
+
+  .date-picker__nav button {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(45, 41, 100, 0.08);
+    color: var(--gray-text);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .date-picker__nav button:hover {
+    background: rgba(45, 41, 100, 0.18);
+  }
+
+  .date-picker__weekdays,
+  .date-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+  }
+
+  .date-picker__weekdays {
+    margin-bottom: 6px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(45, 41, 100, 0.6);
+  }
+
+  .date-picker__day {
+    border: none;
+    background: transparent;
+    padding: 6px 0;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-text);
+    cursor: pointer;
+  }
+
+  .date-picker__day:hover {
+    background: rgba(45, 41, 100, 0.12);
+  }
+
+  .date-picker__day.is-muted {
+    color: rgba(45, 41, 100, 0.35);
+  }
+
+  .date-picker__day.is-today {
+    border: 1px solid rgba(45, 41, 100, 0.35);
+  }
+
+  .date-picker__day.is-selected {
+    background: linear-gradient(120deg, var(--purple), #3f3aa5);
+    color: #fff;
+  }
+
+  .time-picker {
+    display: none;
+    position: absolute;
+    top: 110%;
+    left: 0;
+    z-index: 30;
+    background: #fff;
+    border: 1px solid rgba(45, 41, 100, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 18px 40px rgba(17, 25, 58, 0.22);
+    padding: 12px;
+    gap: 10px;
+    min-width: 190px;
+    box-sizing: border-box;
+  }
+
+  .time-picker.active {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .time-column {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+    border-right: 1px solid rgba(45, 41, 100, 0.08);
+    padding-right: 10px;
+  }
+
+  .time-column:last-child {
+    border-right: none;
+    padding-right: 0;
+  }
+
+  .time-option {
+    border: none;
+    background: transparent;
+    padding: 6px 8px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--gray-text);
+    cursor: pointer;
+  }
+
+  .time-option:hover,
+  .time-option.active {
+    background: rgba(45, 41, 100, 0.12);
+  }
+
+  .time-picker-footer {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 12px;
+  }
+
+  .time-picker button {
+    border: none;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+
+  .time-clear {
+    background: rgba(45, 41, 100, 0.08);
+    color: var(--gray-text);
+  }
+
+  .time-apply {
+    background: var(--purple);
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(45, 41, 100, 0.28);
+  }
+
+  .shift-remove {
+    display: none;
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #b04141;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  body.is-editing .shift-entry:hover .shift-remove {
+    display: inline-flex;
+  }
+
+  .time-input {
+    display: none;
+  }
+
+  .shift-add {
+    display: none;
+    margin-top: 10px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(120deg, var(--purple), #3f3aa5);
+    color: #fff;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(45, 41, 100, 0.26);
+  }
+
+  body.is-editing .shift-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .shift-add:active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
+
+  .timesheet-table tfoot td {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+
+  .table-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .table-scroll::-webkit-scrollbar-thumb {
+    background: rgba(45, 41, 100, 0.25);
+    border-radius: 999px;
+  }
+
+  .signatures {
+    margin: 30px 0 26px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .signature-card {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 22px;
+    font-size: 13px;
+  }
+
+  .signature-card .row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .signature-card .row:last-child {
+    margin-bottom: 0;
+  }
+
+  .signature-card .label {
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .signature-card .label.signature-label {
+    white-space: nowrap;
+  }
+
+  .signature-label br {
+    display: none;
+  }
+
+  body.is-editing:not(.page-a3) .signature-card .label.signature-label {
+    white-space: normal;
+  }
+
+  body.is-editing:not(.page-a3) .signature-label br {
+    display: inline;
+  }
+
+.signature-card .value {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 1px solid var(--border);
+  min-height: 20px;
+  padding-bottom: 2px;
+}
+
+.signature-card .value span[data-editable] {
+  display: inline-block;
+  min-width: 30px;
+}
+
+  .signature-card .value.signature-with-pad {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+.signature-card .value.signature-with-pad span[data-editable] {
+  min-width: 30px;
+}
+
+.signature-pad-wrapper {
+  margin-top: 10px;
+  border: 1px dashed rgba(27, 27, 27, 0.4);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: rgba(45, 41, 100, 0.02);
+  display: none;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
+body.is-editing .signature-pad-wrapper {
+  display: block;
+}
+
+  .signature-pad-canvas {
+    width: 100%;
+    height: 150px;
+    display: block;
+    border-radius: 8px;
+    background: #fff;
+    cursor: crosshair;
+    touch-action: none;
+    image-rendering: crisp-edges;
+  }
+
+  .signature-pad-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .signature-pad-wrapper.is-disabled {
+    opacity: 0.5;
+  }
+
+  .signature-pad-controls button {
+    border: none;
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(45, 41, 100, 0.1);
+    color: var(--purple);
+  }
+
+  .signature-pad-controls button:hover {
+    background: rgba(45, 41, 100, 0.18);
+  }
+
+  .signature-preview {
+    display: none;
+    margin-left: 8px;
+    max-height: 36px;
+    max-width: 200px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+
+  body.is-editing .signature-pad-wrapper {
+    display: block;
+  }
+
+  body.is-editing .signature-preview {
+    display: none !important;
+  }
+
+  body:not(.is-editing) .signature-preview.is-visible {
+    display: inline-block;
+  }
+
+  .sheet-footer {
+    flex-shrink: 0;
+    padding: 12px 32px 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .footer-art,
+  .sheet-footer,
+  .signatures {
+    page-break-inside: avoid;
+  }
+
+  .footer-art img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .footer-content {
+    display: none;
+  }
+
+  [data-editable][contenteditable="true"] {
+    outline: none;
+    box-shadow: inset 0 -2px 0 rgba(247, 148, 29, 0.7);
+  }
+
+  body.is-editing [data-editable][contenteditable="true"] {
+    position: relative;
+  }
+
+  body.is-editing [data-editable][contenteditable="true"]::before {
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #fff;
+    border: 2px solid rgba(45, 41, 100, 0.35);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  body.is-editing .dash-field {
+    position: relative;
+  }
+
+  body.is-editing .dash-field::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #fff;
+    border: 2px solid rgba(45, 41, 100, 0.35);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  body.is-editing .dash-field [data-editable][contenteditable="true"]::before {
+    content: none;
+  }
+
+  body.is-editing .info-table td,
+  body.is-editing .timesheet-table td,
+  body.is-editing .signature-card .value {
+    background: rgba(247, 148, 29, 0.07);
+  }
+
+  body.is-editing .title-display {
+    padding: 6px 8px;
+    border-radius: 12px;
+    background: rgba(247, 148, 29, 0.08);
+  }
+
+  body.is-editing .title-display.is-empty {
+    background: rgba(247, 148, 29, 0.04);
+  }
+
+
+  body.is-editing .title-controls {
+    display: flex;
+  }
+
+  body.is-editing .info-table td.value,
+  body.is-editing .signature-card .value,
+  body.is-editing .dash-field,
+  body.is-editing .timesheet-table td span[data-editable] {
+    cursor: text;
+  }
+
+body:not(.is-editing) .title-controls select,
+body:not(.is-editing) .title-clear,
+body:not(.is-editing) .title-menu-toggle {
+  pointer-events: none;
+}
+
+  @media (max-width: 768px) {
+    body {
+      padding: 0 12px;
+    }
+
+    .page {
+      margin: 24px auto 36px;
+      min-height: auto;
+      border-radius: 12px;
+    }
+
+    .sheet-header {
+      padding: 32px 26px 16px;
+    }
+
+    .document {
+      padding: 0 22px 36px;
+    }
+
+    .title-bar {
+      margin: 14px 0 14px;
+    }
+
+    .title-bar h1 {
+      font-size: 18px;
+      padding: 10px 18px;
+    }
+
+    .info-table {
+      font-size: 12px;
+    }
+
+    .info-table td {
+      padding: 8px 10px;
+    }
+
+    .info-table td.label {
+      width: 22%;
+    }
+
+    .contact-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .info-table-scroll {
+      overflow-x: auto;
+      padding-bottom: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .info-table {
+      min-width: 640px;
+    }
+
+    .contact-entry {
+      padding: 6px 8px;
+    }
+
+    .contact-lines {
+      padding: 0;
+      gap: 8px;
+      min-width: 640px;
+    }
+
+    .contact-line {
+      grid-template-columns: min-content minmax(0, 1fr);
+      column-gap: 10px;
+      row-gap: 8px;
+      align-items: center;
+    }
+
+    .contact-line .contact-label {
+      width: auto;
+    }
+
+    .dash-field--short,
+    .dash-field--long {
+      max-width: 100%;
+    }
+
+    .title-field {
+      gap: 10px;
+    }
+
+    .title-display {
+      gap: 6px;
+    }
+
+    .title-chip {
+      padding: 5px 10px;
+      font-size: 11px;
+    }
+
+    .title-controls {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .title-controls select {
+      width: 100%;
+    }
+
+    .title-select-wrapper::after {
+      right: 16px;
+    }
+
+    .title-clear {
+      align-self: flex-start;
+    }
+
+
+    .timesheet-table th,
+    .timesheet-table td {
+      font-size: 12px;
+      padding: 8px 10px;
+    }
+
+    .shift-entry span {
+      min-width: 70px;
+      font-size: 12px;
+    }
+
+    .shift-add {
+      width: 100%;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .signatures {
+      grid-template-columns: 1fr;
+      margin: 28px 0 24px;
+      gap: 18px;
+    }
+
+    .signature-card {
+      padding: 18px 24px;
+      font-size: inherit;
+    }
+
+    .signature-card .row:first-child {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .signature-card .row:first-child .label.signature-label {
+      width: 100%;
+      white-space: normal;
+    }
+
+    .signature-card .row:first-child .value.signature-with-pad {
+      width: 100%;
+    }
+
+    .signature-pad-wrapper {
+      padding: 12px 14px;
+    }
+
+    .signature-pad-canvas {
+      height: 190px;
+    }
+
+    .sheet-footer {
+      padding: 18px 24px 20px;
+    }
+  }
+
+  @media print {
+    body {
+      margin: 0;
+      background: #fff;
+      -webkit-print-color-adjust: exact;
+      font-size: 12px;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      left: 0;
+      right: 0;
+      height: 8mm;
+      background: #fff;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    body::before {
+      top: -2mm;
+    }
+
+    body::after {
+      bottom: -2mm;
+    }
+
+    .controls,
+    .shift-add,
+    .shift-remove,
+    .time-picker,
+    .date-picker {
+      display: none !important;
+    }
+
+    .title-controls {
+      display: none !important;
+    }
+
+    .page {
+      width: calc(210mm - 8mm);
+      max-width: 800px;
+      margin: 4mm auto;
+      min-height: auto;
+      box-shadow: none;
+      border-radius: 14px;
+    }
+
+    body.page-a3 .page {
+      width: calc(297mm - 8mm);
+      max-width: 1080px;
+      margin: 4mm auto;
+    }
+
+    .sheet-header {
+      padding: 28px 24px 12px;
+    }
+
+    .info-table {
+      font-size: 12px;
+    }
+
+    .info-table td {
+      padding: 8px 12px;
+      border-color: #000;
+    }
+
+    .info-table td.label {
+      background: #f3f3f3;
+    }
+
+    .contact-line {
+      grid-template-columns: min-content minmax(0, 1fr) min-content minmax(0, 1.4fr);
+      column-gap: 4px;
+      align-items: end;
+    }
+
+    .contact-lines {
+      padding: 0;
+    }
+
+    .dash-field {
+      border-bottom-color: #000;
+    }
+
+
+    .contact-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      padding: 10px 14px;
+    }
+
+    .contact-field .contact-label {
+      color: #000;
+    }
+
+    .header-art img {
+      width: 100%;
+      height: auto;
+    }
+
+    .document {
+      padding: 0 28px 6px;
+    }
+
+    .sheet-footer {
+      padding: 6px 28px 0;
+    }
+
+    .table-scroll {
+      overflow: visible !important;
+    }
+
+    .signatures {
+      page-break-inside: avoid;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 14px 0 6px;
+    }
+
+    .signature-card {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 22px;
+    }
+
+    .signature-card .row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .signature-card .row:last-child {
+      margin-bottom: 0;
+    }
+
+    .signature-card .value {
+      flex: 1;
+      border-bottom: 1px solid var(--border);
+      min-height: 20px;
+      padding-bottom: 0;
+    }
+
+    .signature-card .value span[data-editable] {
+      display: inline-block;
+      min-width: 120px;
+    }
+
+    .signature-pad-wrapper {
+      width: 100%;
+    }
+  }
+
+</style>
+</head>
+<body>
+  <div class="controls">
+    <button id="toggleEditing">Enable Editing</button>
+    <button id="togglePageSize" type="button">Use A3 Paper</button>
+    <button id="printSheet">Print / Save as PDF</button>
+  </div>
+
+  <div class="page">
+    <header class="sheet-header">
+      <div class="header-art">
+        <img src="header aimex.png" alt="Aimex Homecare Services header artwork">
+      </div>
+    </header>
+
+    <main class="document">
+      <div class="title-bar">
+        <h1>EMPLOYEE WEEKLY TIMESHEET</h1>
+      </div>
+
+      <div class="info-table-scroll">
+      <table class="info-table">
+        <tr>
+          <td class="label">Client Name:</td>
+          <td class="value"><span data-editable="true" data-uppercase="true"></span></td>
+          <td class="label">Employees Name:</td>
+          <td class="value"><span data-editable="true" data-uppercase="true"></span></td>
+        </tr>
+        <tr>
+          <td class="label">Week Starting:</td>
+          <td class="value">
+            <span data-week-start="true"></span>
+            <input class="date-input" type="date" data-week-start-input="true">
+          </td>
+          <td class="label">Week Ending:</td>
+          <td class="value"><span data-week-end="true"></span></td>
+        </tr>
+        <tr class="info-contact-row">
+          <td class="label">Title:</td>
+          <td class="value">
+            <div
+              class="title-field"
+              data-title-field="true"
+              data-selected-titles=""
+            >
+              <span class="title-display" data-title-display="true">--</span>
+              <div class="title-controls">
+                <div class="title-select-wrapper" data-title-menu-wrapper="true">
+                  <button type="button" class="title-menu-toggle" data-title-menu-toggle="true" disabled>
+                    <span class="title-menu-label">ADD TITLE</span>
+                    <span class="title-menu-caret"></span>
+                  </button>
+                  <div class="title-menu" data-title-menu-panel="true"></div>
+                  <select class="title-native-select" data-title-select="true">
+                    <option value="" data-placeholder="true">ADD TITLE</option>
+                  </select>
+                </div>
+                <button type="button" class="title-clear" data-title-clear="true">Clear Titles</button>
+              </div>
+            </div>
+          </td>
+          <td class="label">Phone:</td>
+          <td class="value contact-entry">
+            <span data-editable="true" data-contact="phone"></span>
+          </td>
+        </tr>
+        <tr class="contact-lines-row">
+          <td colspan="4">
+            <div class="contact-lines">
+              <div class="contact-line">
+                <span class="contact-label">ID:</span>
+                <div class="dash-field dash-field--short contact-entry">
+                  <span data-editable="true" data-contact="id">--</span>
+                </div>
+                <span class="contact-label">Email:</span>
+                <div class="dash-field dash-field--long contact-entry">
+                  <span data-editable="true" data-contact="email"></span>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </table>
+      </div>
+
+      <div class="table-scroll">
+      <table class="timesheet-table">
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span data-editable="true">Sunday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="0"></span></td><td><div class="shift-list" data-day-index="0" data-shift-side="start"><div class="shift-entry" data-day-index="0" data-shift-index="0"><span data-shift-display="start" data-day-index="0" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="0" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="0" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="0">+ Add Shift</button></td><td><div class="shift-list" data-day-index="0" data-shift-side="end"><div class="shift-entry" data-day-index="0" data-shift-index="0"><span data-shift-display="end" data-day-index="0" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="0" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="0">0.00</span></td></tr>
+          <tr><td><span data-editable="true">Monday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="1"></span></td><td><div class="shift-list" data-day-index="1" data-shift-side="start"><div class="shift-entry" data-day-index="1" data-shift-index="0"><span data-shift-display="start" data-day-index="1" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="1" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="1" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="1">+ Add Shift</button></td><td><div class="shift-list" data-day-index="1" data-shift-side="end"><div class="shift-entry" data-day-index="1" data-shift-index="0"><span data-shift-display="end" data-day-index="1" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="1" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="1">0.00</span></td></tr>
+          <tr><td><span data-editable="true">Tuesday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="2"></span></td><td><div class="shift-list" data-day-index="2" data-shift-side="start"><div class="shift-entry" data-day-index="2" data-shift-index="0"><span data-shift-display="start" data-day-index="2" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="2" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="2" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="2">+ Add Shift</button></td><td><div class="shift-list" data-day-index="2" data-shift-side="end"><div class="shift-entry" data-day-index="2" data-shift-index="0"><span data-shift-display="end" data-day-index="2" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="2" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="2">0.00</span></td></tr>
+          <tr><td><span data-editable="true">Wednesday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="3"></span></td><td><div class="shift-list" data-day-index="3" data-shift-side="start"><div class="shift-entry" data-day-index="3" data-shift-index="0"><span data-shift-display="start" data-day-index="3" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="3" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="3" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="3">+ Add Shift</button></td><td><div class="shift-list" data-day-index="3" data-shift-side="end"><div class="shift-entry" data-day-index="3" data-shift-index="0"><span data-shift-display="end" data-day-index="3" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="3" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="3">0.00</span></td></tr>
+          <tr><td><span data-editable="true">Thursday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="4"></span></td><td><div class="shift-list" data-day-index="4" data-shift-side="start"><div class="shift-entry" data-day-index="4" data-shift-index="0"><span data-shift-display="start" data-day-index="4" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="4" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="4" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="4">+ Add Shift</button></td><td><div class="shift-list" data-day-index="4" data-shift-side="end"><div class="shift-entry" data-day-index="4" data-shift-index="0"><span data-shift-display="end" data-day-index="4" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="4" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="4">0.00</span></td></tr>
+          <tr><td><span data-editable="true">Friday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="5"></span></td><td><div class="shift-list" data-day-index="5" data-shift-side="start"><div class="shift-entry" data-day-index="5" data-shift-index="0"><span data-shift-display="start" data-day-index="5" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="5" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="5" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="5">+ Add Shift</button></td><td><div class="shift-list" data-day-index="5" data-shift-side="end"><div class="shift-entry" data-day-index="5" data-shift-index="0"><span data-shift-display="end" data-day-index="5" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="5" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="5">0.00</span></td></tr>
+          <tr><td><span data-editable="true">Saturday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="6"></span></td><td><div class="shift-list" data-day-index="6" data-shift-side="start"><div class="shift-entry" data-day-index="6" data-shift-index="0"><span data-shift-display="start" data-day-index="6" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="6" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="6" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="6">+ Add Shift</button></td><td><div class="shift-list" data-day-index="6" data-shift-side="end"><div class="shift-entry" data-day-index="6" data-shift-index="0"><span data-shift-display="end" data-day-index="6" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="6" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="6">0.00</span></td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4">Total Hours Worked</td>
+            <td class="hours"><span data-total-hours="true">0.00</span></td>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="signature-section-scroll">
+      <section class="signatures">
+        <div class="signature-card">
+          <div class="row">
+            <span class="label signature-label">Employee <br>Signature:</span>
+            <span class="value signature-with-pad">
+              <span data-editable="true" data-uppercase="true"></span>
+              <img class="signature-preview" data-signature-preview="employee" alt="Employee signature preview">
+              <div class="signature-pad-wrapper" data-signature-wrapper="employee">
+                <canvas class="signature-pad-canvas" data-signature-canvas="employee"></canvas>
+                <div class="signature-pad-controls">
+                  <button type="button" data-signature-clear="employee">Clear</button>
+                </div>
+                <input type="hidden" data-signature-input="employee_signature_drawing" value="">
+              </div>
+            </span>
+          </div>
+          <div class="row">
+            <span class="label">Date:</span>
+            <span class="value"><span data-editable="true" data-signature-date="start"></span></span>
+          </div>
+        </div>
+        <div class="signature-card">
+          <div class="row">
+            <span class="label signature-label">Supervisor <br>Signature:</span>
+            <span class="value signature-with-pad">
+              <span data-editable="true" data-uppercase="true"></span>
+              <img class="signature-preview" data-signature-preview="supervisor" alt="Supervisor signature preview">
+              <div class="signature-pad-wrapper" data-signature-wrapper="supervisor">
+                <canvas class="signature-pad-canvas" data-signature-canvas="supervisor"></canvas>
+                <div class="signature-pad-controls">
+                  <button type="button" data-signature-clear="supervisor">Clear</button>
+                </div>
+                <input type="hidden" data-signature-input="supervisor_signature_drawing" value="">
+              </div>
+            </span>
+          </div>
+          <div class="row">
+            <span class="label">Date:</span>
+            <span class="value"><span data-editable="true" data-signature-date="end"></span></span>
+          </div>
+        </div>
+      </section>
+      </div>
+    </main>
+
+    <footer class="sheet-footer">
+      <div class="footer-art">
+        <img src="footer aimex.png" alt="Aimex Homecare Services footer artwork">
+      </div>
+      <div class="footer-content">
+        <div>Phone Number: <strong>202-868-2214</strong></div>
+        <div>info@aimexhomecareservices.com</div>
+        <div>13215 Whiteholm Drive</div>
+        <div>Upper Marlboro, Maryland 20774</div>
+        <div>Service Areas Covered: Montgomery County &amp; Prince George County.</div>
+      </div>
+    </footer>
+  </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleEditingButton = document.getElementById("toggleEditing");
+      const printButton = document.getElementById("printSheet");
+      const pageSizeButton = document.getElementById("togglePageSize");
+      const editableNodes = document.querySelectorAll("[data-editable]");
+      const hoursDisplay = document.querySelector("[data-total-hours]");
+      const weekStartSpan = document.querySelector("[data-week-start]");
+      const weekEndSpan = document.querySelector("[data-week-end]");
+      const weekStartInput = document.querySelector("[data-week-start-input]");
+      const dateCells = Array.from(document.querySelectorAll("[data-date-cell]"));
+      const employeeSignatureDateSpan = document.querySelector(
+        "[data-signature-date='start']"
+      );
+      const supervisorSignatureDateSpan = document.querySelector(
+        "[data-signature-date='end']"
+      );
+      const titleField = document.querySelector("[data-title-field]");
+      const titleDisplay = titleField?.querySelector("[data-title-display]");
+      const titleSelect = titleField?.querySelector("[data-title-select]");
+      const titleClearButton = titleField?.querySelector("[data-title-clear]");
+      const titleMenuToggle = titleField?.querySelector("[data-title-menu-toggle]");
+      const titleMenuPanel = titleField?.querySelector("[data-title-menu-panel]");
+      const titleMenuWrapper = titleField?.querySelector("[data-title-menu-wrapper]");
+
+      const pageSizeStyle = (() => {
+        const existing = document.getElementById("pageSizeOverride");
+        if (existing) {
+          return existing;
+        }
+        const styleEl = document.createElement("style");
+        styleEl.id = "pageSizeOverride";
+        document.head.appendChild(styleEl);
+        return styleEl;
+      })();
+
+      let currentPageSize = "A4";
+
+      let weekDatePicker;
+
+      const HOUR_VALUES = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
+      const MINUTE_VALUES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
+      const PERIOD_VALUES = ["AM", "PM"];
+      const TITLE_OPTIONS = ["CNA", "HHA", "PCA"];
+
+      let isEditing = false;
+      let activePicker = null;
+      let selectedTitles = [];
+      let isTitleMenuOpen = false;
+      const signaturePads = [];
+
+      const createSignaturePad = (wrapper) => {
+        const canvas = wrapper.querySelector("[data-signature-canvas]");
+        const clearButton = wrapper.querySelector("[data-signature-clear]");
+        const input = wrapper.querySelector("[data-signature-input]");
+        const preview = document.querySelector(
+          `[data-signature-preview="${wrapper.dataset.signatureWrapper}"]`
+        );
+        if (!canvas) {
+          return null;
+        }
+        const ctx = canvas.getContext("2d");
+        let drawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        const getRect = () => canvas.getBoundingClientRect();
+
+        const isSignatureDataUrl = (value) =>
+          typeof value === "string" && value.startsWith("data:image/");
+
+        const updatePreview = (dataUrl) => {
+          if (!preview) {
+            return;
+          }
+          if (isSignatureDataUrl(dataUrl)) {
+            preview.src = dataUrl;
+            preview.classList.add("is-visible");
+          } else {
+            preview.removeAttribute("src");
+            preview.classList.remove("is-visible");
+          }
+        };
+
+        const drawSnapshot = (dataUrl) => {
+          if (!isSignatureDataUrl(dataUrl)) {
+            updatePreview("");
+            return;
+          }
+          const img = new Image();
+          img.onload = () => {
+            const rect = getRect();
+            ctx.drawImage(img, 0, 0, rect.width, rect.height);
+          };
+          img.src = dataUrl;
+          updatePreview(dataUrl);
+        };
+
+        const resizeCanvas = (preserve = true) => {
+          const rect = getRect();
+          const ratio = window.devicePixelRatio || 1;
+          const snapshot =
+            preserve && isSignatureDataUrl(input?.value) ? input.value : "";
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          canvas.width = rect.width * ratio;
+          canvas.height = rect.height * ratio;
+          ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+          ctx.lineWidth = 2;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.strokeStyle = "#2d2964";
+          if (snapshot) {
+            drawSnapshot(snapshot);
+          } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            updatePreview("");
+          }
+        };
+
+        const saveSnapshot = () => {
+          if (!input) {
+            return;
+          }
+          const dataUrl = canvas.toDataURL("image/png");
+          input.value = dataUrl;
+          updatePreview(dataUrl);
+        };
+
+        const clearCanvas = () => {
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          if (input) {
+            input.value = "";
+          }
+          updatePreview("");
+          resizeCanvas(false);
+        };
+
+        const getPositionFromPoint = (clientX, clientY) => {
+          const rect = getRect();
+          return {
+            x: clientX - rect.left,
+            y: clientY - rect.top,
+          };
+        };
+
+        const beginStroke = (pos) => {
+          drawing = true;
+          lastX = pos.x;
+          lastY = pos.y;
+        };
+
+        const drawStroke = (pos) => {
+          ctx.beginPath();
+          ctx.moveTo(lastX, lastY);
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+          lastX = pos.x;
+          lastY = pos.y;
+          saveSnapshot();
+        };
+
+        const endStroke = () => {
+          drawing = false;
+        };
+
+        const handlePointerDown = (event) => {
+          if (!isEditing) {
+            return;
+          }
+          event.preventDefault();
+          canvas.setPointerCapture?.(event.pointerId);
+          beginStroke(getPositionFromPoint(event.clientX, event.clientY));
+        };
+
+        const handlePointerMove = (event) => {
+          if (!drawing || !isEditing) {
+            return;
+          }
+          event.preventDefault();
+          drawStroke(getPositionFromPoint(event.clientX, event.clientY));
+        };
+
+        const stopDrawing = (event) => {
+          if (!drawing) {
+            return;
+          }
+          event.preventDefault();
+          endStroke();
+          canvas.releasePointerCapture?.(event.pointerId);
+        };
+
+        const handleMouseDown = (event) => {
+          if (!isEditing) {
+            return;
+          }
+          event.preventDefault();
+          beginStroke(getPositionFromPoint(event.clientX, event.clientY));
+        };
+
+        const handleMouseMove = (event) => {
+          if (!drawing || !isEditing) {
+            return;
+          }
+          event.preventDefault();
+          drawStroke(getPositionFromPoint(event.clientX, event.clientY));
+        };
+
+        const handleMouseUp = (event) => {
+          if (!drawing) {
+            return;
+          }
+          event?.preventDefault();
+          endStroke();
+        };
+
+        const handleTouchStart = (event) => {
+          if (!isEditing) {
+            return;
+          }
+          const touch = event.touches[0];
+          if (!touch) {
+            return;
+          }
+          event.preventDefault();
+          beginStroke(getPositionFromPoint(touch.clientX, touch.clientY));
+        };
+
+        const handleTouchMove = (event) => {
+          if (!drawing || !isEditing) {
+            return;
+          }
+          const touch = event.touches[0];
+          if (!touch) {
+            return;
+          }
+          event.preventDefault();
+          drawStroke(getPositionFromPoint(touch.clientX, touch.clientY));
+        };
+
+        const handleTouchEnd = (event) => {
+          if (!drawing) {
+            return;
+          }
+          event.preventDefault();
+          endStroke();
+        };
+
+        const supportsPointer = "PointerEvent" in window;
+
+        if (supportsPointer) {
+          canvas.addEventListener("pointerdown", handlePointerDown);
+          canvas.addEventListener("pointermove", handlePointerMove);
+          canvas.addEventListener("pointerup", stopDrawing);
+          canvas.addEventListener("pointerleave", endStroke);
+          canvas.addEventListener("pointercancel", endStroke);
+        } else {
+          canvas.addEventListener("mousedown", handleMouseDown);
+          canvas.addEventListener("mousemove", handleMouseMove);
+          window.addEventListener("mouseup", handleMouseUp);
+          canvas.addEventListener("mouseleave", handleMouseUp);
+          canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+          canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+          canvas.addEventListener("touchend", handleTouchEnd);
+          canvas.addEventListener("touchcancel", handleTouchEnd);
+        }
+
+        clearButton?.addEventListener("click", (event) => {
+          event.preventDefault();
+          if (!isEditing) {
+            return;
+          }
+          clearCanvas();
+        });
+
+        resizeCanvas();
+        window.addEventListener("resize", () => resizeCanvas());
+
+        const setEnabled = (enabled) => {
+          wrapper.classList.toggle("is-disabled", !enabled);
+          canvas.style.pointerEvents = enabled ? "auto" : "none";
+        };
+
+        updatePreview(input?.value || "");
+
+        return {
+          resize: () => resizeCanvas(),
+          clear: clearCanvas,
+          setEnabled,
+        };
+      };
+
+      const initSignaturePads = () => {
+        document.querySelectorAll("[data-signature-wrapper]").forEach((wrapper) => {
+          const pad = createSignaturePad(wrapper);
+          if (pad) {
+            signaturePads.push(pad);
+            pad.setEnabled(isEditing);
+          }
+        });
+      };
+
+      const sanitizeTitleList = (list) =>
+        Array.from(
+          new Set(
+            (list || [])
+              .map((value) => (value == null ? "" : String(value).trim()))
+              .filter((value) => value && value !== "--")
+          )
+        );
+
+      const updateTitleDataset = () => {
+        if (!titleField) {
+          return;
+        }
+        titleField.dataset.selectedTitles = selectedTitles.join("|");
+      };
+      const syncTitleDisplay = () => {
+        if (!titleDisplay) {
+          return;
+        }
+        titleDisplay.innerHTML = "";
+        if (!selectedTitles.length) {
+          titleDisplay.classList.add("is-empty");
+          titleDisplay.textContent = "--";
+          return;
+        }
+        titleDisplay.classList.remove("is-empty");
+        selectedTitles.forEach((title) => {
+          const chip = document.createElement("span");
+          chip.className = "title-chip";
+          chip.textContent = title;
+          titleDisplay.appendChild(chip);
+        });
+      };
+
+      const closeTitleMenu = () => {
+        if (!titleMenuWrapper) {
+          return;
+        }
+        titleMenuWrapper.classList.remove("is-open");
+        isTitleMenuOpen = false;
+      };
+
+      const renderTitleMenu = () => {
+        if (!titleMenuPanel || !titleSelect) {
+          return;
+        }
+        titleMenuPanel.innerHTML = "";
+        const options = Array.from(titleSelect.options).filter((_, index) => index !== 0);
+        if (!options.length) {
+          titleMenuPanel.innerHTML =
+            '<div class="title-menu-empty">No titles available</div>';
+          return;
+        }
+        options.forEach((option) => {
+          if (!option.value) {
+            return;
+          }
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "title-menu-item";
+          button.dataset.titleMenuValue = option.value;
+          button.innerHTML = `
+            <span class="title-menu-item-label">${(option.dataset.label || option.value).toUpperCase()}</span>
+            <span class="title-menu-item-check">${selectedTitles.includes(option.value) ? "✓" : ""}</span>
+          `;
+          if (selectedTitles.includes(option.value)) {
+            button.classList.add("is-active");
+          }
+          titleMenuPanel.appendChild(button);
+        });
+      };
+
+      const openTitleMenu = () => {
+        if (!isEditing || !titleMenuWrapper) {
+          return;
+        }
+        renderTitleMenu();
+        titleMenuWrapper.classList.add("is-open");
+        isTitleMenuOpen = true;
+      };
+
+      const toggleTitleMenu = () => {
+        if (!isEditing) {
+          return;
+        }
+        if (isTitleMenuOpen) {
+          closeTitleMenu();
+        } else {
+          openTitleMenu();
+        }
+      };
+
+      const syncTitleOptions = () => {
+        if (!titleSelect) {
+          return;
+        }
+        const hasSelection = selectedTitles.length > 0;
+        Array.from(titleSelect.options).forEach((option, index) => {
+          if (index === 0) {
+            option.disabled = true;
+            option.textContent = "ADD TITLE";
+            option.selected = true;
+            return;
+          }
+          const baseLabel = option.dataset.label || option.value;
+          const isActive = selectedTitles.includes(option.value);
+          option.textContent = isActive ? `[x] ${baseLabel}` : baseLabel;
+          option.selected = false;
+        });
+        titleSelect.selectedIndex = 0;
+        titleSelect.value = "";
+        renderTitleMenu();
+      };
+
+      const commitTitleChanges = () => {
+        selectedTitles = sanitizeTitleList(selectedTitles);
+        updateTitleDataset();
+        syncTitleDisplay();
+        syncTitleOptions();
+        if (titleClearButton) {
+          titleClearButton.disabled = !isEditing || selectedTitles.length === 0;
+        }
+        renderTitleMenu();
+      };
+
+      const initializeTitleSelect = () => {
+        if (!titleSelect) {
+          return;
+        }
+        // Remove dynamically generated options before rebuilding
+        Array.from(
+          titleSelect.querySelectorAll("option[data-generated='dynamic']")
+        ).forEach((option) => option.remove());
+        const ensureOption = (title) => {
+          const normalized = title?.toString().trim();
+          if (!normalized) {
+            return;
+          }
+          const exists = Array.from(titleSelect.options).some(
+            (option) => option.value === normalized
+          );
+          if (exists) {
+            return;
+          }
+          const option = document.createElement("option");
+          option.value = normalized;
+          option.dataset.label = normalized;
+          option.dataset.generated = "dynamic";
+          option.textContent = normalized;
+          titleSelect.appendChild(option);
+        };
+
+        TITLE_OPTIONS.forEach(ensureOption);
+
+        if (titleField) {
+          const stored = titleField.dataset.selectedTitles || "";
+          if (stored) {
+            selectedTitles = sanitizeTitleList(stored.split("|"));
+          } else if (titleDisplay) {
+            const chips = Array.from(titleDisplay.querySelectorAll(".title-chip"));
+            if (chips.length) {
+              selectedTitles = sanitizeTitleList(
+                chips.map((chip) => chip.textContent || "")
+              );
+            } else {
+              selectedTitles = sanitizeTitleList(
+                (titleDisplay.textContent || "")
+                  .split(/[\n,]+/)
+                  .map((value) => value.replace(/^[\[\]x\s]+/, ""))
+              );
+            }
+          }
+        }
+
+        selectedTitles.forEach(ensureOption);
+
+
+        commitTitleChanges();
+
+        if (titleSelect) {
+          titleSelect.disabled = !isEditing;
+        }
+      };
+
+      initializeTitleSelect();
+      initSignaturePads();
+
+      titleSelect?.addEventListener("change", (event) => {
+        const value = event.target.value;
+        if (!value) {
+          return;
+        }
+        if (!isEditing) {
+          event.target.value = "";
+          return;
+        }
+        if (selectedTitles.includes(value)) {
+          selectedTitles = selectedTitles.filter((item) => item !== value);
+        } else {
+          selectedTitles.push(value);
+        }
+        commitTitleChanges();
+        event.target.value = "";
+      });
+
+      titleClearButton?.addEventListener("click", () => {
+        if (!isEditing) {
+          return;
+        }
+        selectedTitles = [];
+        commitTitleChanges();
+      });
+
+      titleMenuToggle?.addEventListener("click", (event) => {
+        event.preventDefault();
+        toggleTitleMenu();
+      });
+
+      titleMenuPanel?.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-title-menu-value]");
+        if (!button || !isEditing) {
+          return;
+        }
+        const value = button.dataset.titleMenuValue;
+        if (!value) {
+          return;
+        }
+        if (selectedTitles.includes(value)) {
+          selectedTitles = selectedTitles.filter((item) => item !== value);
+        } else {
+          selectedTitles.push(value);
+        }
+        commitTitleChanges();
+        renderTitleMenu();
+        event.stopPropagation();
+      });
+
+      const pad = (value) => String(value).padStart(2, "0");
+
+      const formatSlash = (date) =>
+        `${pad(date.getMonth() + 1)}/${pad(date.getDate())}/${date.getFullYear()}`;
+
+      const formatHyphen = (date) =>
+        `${pad(date.getMonth() + 1)}-${pad(date.getDate())}-${date.getFullYear()}`;
+
+      const formatISO = (date) =>
+        `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+      const startOfWeek = (date) => {
+        const clone = new Date(date);
+        clone.setHours(0, 0, 0, 0);
+        clone.setDate(clone.getDate() - clone.getDay());
+        return clone;
+      };
+
+      const formatTimeDisplay = (value) => {
+        if (!value) {
+          return "--";
+        }
+        const [hourStr, minute] = value.split(":");
+        const hour = parseInt(hourStr, 10);
+        if (Number.isNaN(hour) || minute === undefined) {
+          return value;
+        }
+        const suffix = hour >= 12 ? "PM" : "AM";
+        let displayHour = hour % 12;
+        if (displayHour === 0) {
+          displayHour = 12;
+        }
+        return `${pad(displayHour)}:${minute}${suffix}`;
+      };
+
+      const splitTime = (value) => {
+        if (!value) {
+          return { hour: "", minute: "00", period: "AM" };
+        }
+        const [hourStr, minute] = value.split(":");
+        let hour = parseInt(hourStr, 10);
+        if (Number.isNaN(hour) || minute === undefined) {
+          return { hour: "", minute: "00", period: "AM" };
+        }
+        const period = hour >= 12 ? "PM" : "AM";
+        let displayHour = hour % 12;
+        if (displayHour === 0) {
+          displayHour = 12;
+        }
+        return { hour: pad(displayHour), minute, period };
+      };
+
+      const to24Hour = (hour12, minute, period) => {
+        let hour = parseInt(hour12, 10);
+        if (Number.isNaN(hour) || !minute || !period) {
+          return "";
+        }
+        if (period === "PM" && hour !== 12) {
+          hour += 12;
+        }
+        if (period === "AM" && hour === 12) {
+          hour = 0;
+        }
+        return `${pad(hour)}:${minute}`;
+      };
+
+      const parseDisplayDate = (value) => {
+        if (!value) {
+          return null;
+        }
+        const [month, day, year] = value.trim().split(/[\/\-]/);
+        const monthNum = parseInt(month, 10);
+        const dayNum = parseInt(day, 10);
+        const yearNum = parseInt(year, 10);
+        if (
+          Number.isNaN(monthNum) ||
+          Number.isNaN(dayNum) ||
+          Number.isNaN(yearNum)
+        ) {
+          return null;
+        }
+        const parsed = new Date(yearNum, monthNum - 1, dayNum);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      };
+
+      const minutesBetween = (startValue, endValue) => {
+        if (!startValue || !endValue) {
+          return 0;
+        }
+        const [sh, sm] = startValue.split(":").map((part) => parseInt(part, 10));
+        const [eh, em] = endValue.split(":").map((part) => parseInt(part, 10));
+        if ([sh, sm, eh, em].some((n) => Number.isNaN(n))) {
+          return 0;
+        }
+        let startMinutes = sh * 60 + sm;
+        let endMinutes = eh * 60 + em;
+        if (endMinutes < startMinutes) {
+          endMinutes += 24 * 60;
+        }
+        return Math.max(endMinutes - startMinutes, 0);
+      };
+
+      const normalizeTimeString = (raw) => {
+        if (!raw) {
+          return "";
+        }
+        let value = raw.trim().toUpperCase();
+        if (!value) {
+          return "";
+        }
+        value = value.replace(/[^0-9APM:]/g, "");
+        if (!value) {
+          return "";
+        }
+        const twentyFour = value.match(/^(\d{1,2}):(\d{2})$/);
+        if (twentyFour) {
+          const hour = parseInt(twentyFour[1], 10);
+          const minute = parseInt(twentyFour[2], 10);
+          if (
+            Number.isInteger(hour) &&
+            hour >= 0 &&
+            hour <= 23 &&
+            Number.isInteger(minute) &&
+            minute >= 0 &&
+            minute <= 59
+          ) {
+            return `${pad(hour)}:${pad(minute)}`;
+          }
+        }
+        const match = value.match(/^(\d{1,2})(?::(\d{2}))?(AM|PM)$/);
+        if (!match) {
+          return "";
+        }
+        let hour = parseInt(match[1], 10);
+        let minute = match[2] ? parseInt(match[2], 10) : 0;
+        const period = match[3]?.toUpperCase();
+        if (
+          Number.isNaN(hour) ||
+          Number.isNaN(minute) ||
+          minute < 0 ||
+          minute > 59
+        ) {
+          return "";
+        }
+        if (period === "PM" && hour !== 12) {
+          hour += 12;
+        }
+        if (period === "AM" && hour === 12) {
+          hour = 0;
+        }
+        return `${pad(hour)}:${pad(minute)}`;
+      };
+
+      const focusEditable = (node, moveCaret = false) => {
+        if (!node || !node.isContentEditable) {
+          return;
+        }
+        node.focus();
+        if (!moveCaret) {
+          return;
+        }
+        const selection = window.getSelection();
+        if (!selection) {
+          return;
+        }
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      };
+
+      const focusEditableIn = (container) => {
+        if (!container) {
+          return false;
+        }
+        const node = container.querySelector(
+          "[data-editable][contenteditable='true']"
+        );
+        if (!node) {
+          return false;
+        }
+        focusEditable(node, true);
+        return true;
+      };
+
+      const applyPageSize = (size) => {
+        const normalized = size === "A3" ? "A3" : "A4";
+        currentPageSize = normalized;
+        document.body.classList.toggle("page-a3", normalized === "A3");
+        if (normalized === "A3") {
+          pageSizeStyle.textContent = "@page { size: A3; margin: 0; }";
+        } else {
+          pageSizeStyle.textContent = "";
+        }
+        if (pageSizeButton) {
+          pageSizeButton.textContent =
+            normalized === "A3" ? "Use A4 Paper" : "Use A3 Paper";
+          pageSizeButton.setAttribute(
+            "aria-pressed",
+            normalized === "A3" ? "true" : "false"
+          );
+        }
+      };
+
+      applyPageSize(currentPageSize);
+
+      const MM_TO_PX = 96 / 25.4;
+      const A4_HEIGHT_PX = 297 * MM_TO_PX;
+      const A4_MARGIN_PX = 16 * MM_TO_PX;
+
+      const ensurePageFits = () => {
+        if (currentPageSize !== "A4") {
+          return;
+        }
+        const pageNode = document.querySelector(".page");
+        if (!pageNode) {
+          return;
+        }
+        const contentHeight = pageNode.getBoundingClientRect().height;
+        if (contentHeight > A4_HEIGHT_PX - A4_MARGIN_PX) {
+          applyPageSize("A3");
+        }
+      };
+
+  const WEEKDAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+  const formatMonthYear = (date) =>
+    date.toLocaleString("en-US", { month: "long", year: "numeric" });
+
+  const createDatePicker = () => {
+    const root = document.createElement("div");
+    root.className = "date-picker";
+    root.innerHTML = `
+      <div class="date-picker__header">
+        <button type="button" data-nav="prev" aria-label="Previous Month">&#10094;</button>
+        <div class="date-picker__title" data-month></div>
+        <button type="button" data-nav="next" aria-label="Next Month">&#10095;</button>
+      </div>
+      <div class="date-picker__weekdays">
+        ${WEEKDAY_LABELS.map((label) => `<span>${label}</span>`).join("")}
+      </div>
+      <div class="date-picker__grid" data-grid></div>
+    `;
+    document.body.appendChild(root);
+
+    const titleEl = root.querySelector("[data-month]");
+    const gridEl = root.querySelector("[data-grid]");
+    const prevBtn = root.querySelector('[data-nav="prev"]');
+    const nextBtn = root.querySelector('[data-nav="next"]');
+
+    let currentMonth = startOfWeek(new Date());
+    currentMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      1
+    );
+    let selectedDate = null;
+    let anchorEl = null;
+    let onSelect = () => {};
+
+    const render = (reference) => {
+      currentMonth = new Date(reference.getFullYear(), reference.getMonth(), 1);
+      titleEl.textContent = formatMonthYear(currentMonth);
+      gridEl.innerHTML = "";
+
+      const startDate = new Date(currentMonth);
+      startDate.setDate(startDate.getDate() - startDate.getDay());
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      for (let i = 0; i < 42; i += 1) {
+        const cellDate = new Date(startDate);
+        cellDate.setDate(startDate.getDate() + i);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "date-picker__day";
+        button.textContent = cellDate.getDate();
+        button.dataset.iso = cellDate.toISOString();
+
+        if (cellDate.getMonth() !== currentMonth.getMonth()) {
+          button.classList.add("is-muted");
+        }
+
+        if (cellDate.toDateString() === today.toDateString()) {
+          button.classList.add("is-today");
+        }
+
+        if (
+          selectedDate &&
+          cellDate.toDateString() === selectedDate.toDateString()
+        ) {
+          button.classList.add("is-selected");
+        }
+
+        gridEl.appendChild(button);
+      }
+    };
+
+    const open = (anchor, focusDate) => {
+      selectedDate = new Date(
+        focusDate.getFullYear(),
+        focusDate.getMonth(),
+        focusDate.getDate()
+      );
+      render(selectedDate);
+      const rect = anchor.getBoundingClientRect();
+      root.style.top = `${window.scrollY + rect.bottom + 8}px`;
+      root.style.left = `${window.scrollX + rect.left}px`;
+      root.classList.add("active");
+      anchor.classList.add("picker-open");
+      anchorEl = anchor;
+    };
+
+    const close = () => {
+      if (!root.classList.contains("active")) {
+        return;
+      }
+      root.classList.remove("active");
+      anchorEl?.classList.remove("picker-open");
+      anchorEl = null;
+    };
+
+    prevBtn.addEventListener("click", () => {
+      const prev = new Date(currentMonth);
+      prev.setMonth(prev.getMonth() - 1);
+      render(prev);
+    });
+
+    nextBtn.addEventListener("click", () => {
+      const next = new Date(currentMonth);
+      next.setMonth(next.getMonth() + 1);
+      render(next);
+    });
+
+    gridEl.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!target.matches(".date-picker__day")) {
+        return;
+      }
+      selectedDate = new Date(target.dataset.iso);
+      onSelect(selectedDate);
+      close();
+    });
+
+    return {
+      element: root,
+      open,
+      close,
+      isOpen: () => root.classList.contains("active"),
+      setSelected(date) {
+        if (!date) {
+          selectedDate = null;
+          return;
+        }
+        selectedDate = new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate()
+        );
+      },
+      setOnSelect(handler) {
+        onSelect = handler;
+      },
+    };
+  };
+
+      const updateTimeDisplayNode = (node, raw) => {
+        const value = raw || "";
+        node.dataset.rawValue = value;
+        node.textContent = formatTimeDisplay(value);
+        node.classList.toggle("is-empty", !value);
+      };
+
+      const parseHourValue = (text) => {
+        if (!text) {
+          return 0;
+        }
+        const sanitized = text.replace(/[^0-9.\-]/g, "");
+        const value = parseFloat(sanitized);
+        return Number.isFinite(value) ? value : 0;
+      };
+
+      const recalcTotals = () => {
+        let total = 0;
+        document.querySelectorAll("[data-day-hours]").forEach((node) => {
+          total += parseHourValue(node.textContent);
+        });
+        if (hoursDisplay) {
+          hoursDisplay.textContent = total.toFixed(2);
+        }
+      };
+
+      const collectShiftTimes = (list, side) => {
+        if (!list) {
+          return [];
+        }
+        return Array.from(list.querySelectorAll(".shift-entry")).map(
+          (entry) => {
+            const display = entry.querySelector(
+              `[data-shift-display="${side}"]`
+            );
+            if (!display) {
+              return "";
+            }
+            return normalizeTimeString(
+              display.dataset.rawValue || display.textContent || ""
+            );
+          }
+        );
+      };
+
+      const updateShiftHours = (dayIndex, shouldUpdateTotal = true) => {
+        const dayKey = String(dayIndex);
+        const startList = document.querySelector(
+          `.shift-list[data-day-index="${dayKey}"][data-shift-side="start"]`
+        );
+        const endList = document.querySelector(
+          `.shift-list[data-day-index="${dayKey}"][data-shift-side="end"]`
+        );
+        const startTimes = collectShiftTimes(startList, "start");
+        const endTimes = collectShiftTimes(endList, "end");
+        let totalMinutes = 0;
+        const maxCount = Math.max(startTimes.length, endTimes.length);
+        for (let i = 0; i < maxCount; i += 1) {
+          const startValue = startTimes[i] || "";
+          const endValue = endTimes[i] || "";
+          if (!startValue || !endValue) {
+            continue;
+          }
+          totalMinutes += minutesBetween(startValue, endValue);
+        }
+        const hoursSpan = document.querySelector(
+          `[data-day-hours][data-day-index="${dayKey}"]`
+        );
+        if (hoursSpan) {
+          hoursSpan.textContent = (totalMinutes / 60).toFixed(2);
+        }
+        if (shouldUpdateTotal) {
+          recalcTotals();
+        }
+      };
+
+      const recalcAllDayHours = () => {
+        document
+          .querySelectorAll(".shift-list[data-shift-side='start']")
+          .forEach((list) => updateShiftHours(list.dataset.dayIndex, false));
+        recalcTotals();
+        ensurePageFits();
+      };
+
+      const writePickerValue = (picker, value) => {
+        const { dayIndex, shiftIndex, side } = picker.dataset;
+        const hidden = document.querySelector(
+          `input[data-shift-input="${side}"][data-day-index="${dayIndex}"][data-shift-index="${shiftIndex}"]`
+        );
+        const display = document.querySelector(
+          `[data-shift-display="${side}"][data-day-index="${dayIndex}"][data-shift-index="${shiftIndex}"]`
+        );
+        if (hidden) {
+          hidden.value = value;
+        }
+        if (display) {
+          updateTimeDisplayNode(display, value);
+        }
+        updateShiftHours(dayIndex);
+      };
+
+      const setPickerSelection = (picker, type, value) => {
+        picker.dataset[type] = value;
+        picker
+          .querySelectorAll(`.time-option[data-type="${type}"]`)
+          .forEach((btn) => {
+            btn.classList.toggle("active", btn.dataset.value === value);
+            if (btn.dataset.value === value) {
+              btn.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            }
+          });
+      };
+
+      const highlightPickerSelection = (picker) => {
+        ["hour", "minute", "period"].forEach((key) => {
+          const value = picker.dataset[key] || "";
+          picker
+            .querySelectorAll(`.time-option[data-type="${key}"]`)
+            .forEach((btn) =>
+              btn.classList.toggle("active", btn.dataset.value === value)
+            );
+        });
+      };
+
+      const closePicker = (picker) => {
+        if (!picker) {
+          return;
+        }
+        picker.classList.remove("active");
+        if (picker._anchor) {
+          picker._anchor.classList.remove("picker-open");
+        }
+      };
+
+      const closeActivePicker = () => {
+        if (activePicker) {
+          closePicker(activePicker);
+          activePicker = null;
+        }
+      };
+
+      const openPicker = (picker, anchor) => {
+        if (!picker) {
+          return;
+        }
+        if (activePicker && activePicker !== picker) {
+          closePicker(activePicker);
+        }
+        activePicker = picker;
+        picker._anchor = anchor;
+        anchor?.classList.add("picker-open");
+        picker.classList.add("active");
+        highlightPickerSelection(picker);
+      };
+
+      const applyPickerSelection = (picker) => {
+        if (!picker) {
+          return;
+        }
+        const hour = picker.dataset.hour;
+        const minute = picker.dataset.minute;
+        const period = picker.dataset.period;
+        const value = hour && minute && period ? to24Hour(hour, minute, period) : "";
+        writePickerValue(picker, value);
+        closeActivePicker();
+      };
+
+      const clearPickerSelection = (picker) => {
+        if (!picker) {
+          return;
+        }
+        picker.dataset.hour = "";
+        picker.dataset.minute = "00";
+        picker.dataset.period = "AM";
+        writePickerValue(picker, "");
+        closeActivePicker();
+      };
+
+      const buildTimeColumn = (values, type, picker) => {
+        const column = document.createElement("div");
+        column.className = "time-column";
+        values.forEach((value) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "time-option";
+          button.dataset.type = type;
+          button.dataset.value = value;
+          button.textContent = value;
+          if (value === picker.dataset[type]) {
+            button.classList.add("active");
+          }
+          column.appendChild(button);
+        });
+        return column;
+      };
+
+      const buildTimePicker = (dayIndex, shiftIndex, side, value = "") => {
+        const components = splitTime(value);
+        const picker = document.createElement("div");
+        picker.className = "time-picker";
+        picker.dataset.dayIndex = dayIndex;
+        picker.dataset.shiftIndex = shiftIndex;
+        picker.dataset.side = side;
+        picker.dataset.hour = components.hour;
+        picker.dataset.minute = components.minute;
+        picker.dataset.period = components.period;
+
+        picker.appendChild(buildTimeColumn(HOUR_VALUES, "hour", picker));
+        picker.appendChild(buildTimeColumn(MINUTE_VALUES, "minute", picker));
+        picker.appendChild(buildTimeColumn(PERIOD_VALUES, "period", picker));
+
+        const footer = document.createElement("div");
+        footer.className = "time-picker-footer";
+
+        const clearBtn = document.createElement("button");
+        clearBtn.type = "button";
+        clearBtn.className = "time-clear";
+        clearBtn.dataset.dayIndex = dayIndex;
+        clearBtn.dataset.shiftIndex = shiftIndex;
+        clearBtn.dataset.side = side;
+        clearBtn.textContent = "Clear";
+        footer.appendChild(clearBtn);
+
+        const applyBtn = document.createElement("button");
+        applyBtn.type = "button";
+        applyBtn.className = "time-apply";
+        applyBtn.dataset.dayIndex = dayIndex;
+        applyBtn.dataset.shiftIndex = shiftIndex;
+        applyBtn.dataset.side = side;
+        applyBtn.textContent = "Apply";
+        footer.appendChild(applyBtn);
+
+        picker.appendChild(footer);
+        return picker;
+      };
+
+      const buildShiftEntry = (dayIndex, shiftIndex, side, value = "") => {
+        const entry = document.createElement("div");
+        entry.className = "shift-entry";
+        entry.dataset.dayIndex = dayIndex;
+        entry.dataset.shiftIndex = shiftIndex;
+
+        const display = document.createElement("span");
+        display.dataset.shiftDisplay = side;
+        display.dataset.dayIndex = dayIndex;
+        display.dataset.shiftIndex = shiftIndex;
+        entry.appendChild(display);
+
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.className = "time-input";
+        hidden.dataset.shiftInput = side;
+        hidden.dataset.dayIndex = dayIndex;
+        hidden.dataset.shiftIndex = shiftIndex;
+        hidden.value = value || "";
+        entry.appendChild(hidden);
+
+        const picker = buildTimePicker(dayIndex, shiftIndex, side, value);
+        entry.appendChild(picker);
+
+        if (side === "start") {
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "shift-remove";
+          remove.dataset.dayIndex = dayIndex;
+          remove.dataset.shiftIndex = shiftIndex;
+          remove.innerHTML = "&times;";
+          entry.appendChild(remove);
+        }
+
+        updateTimeDisplayNode(display, hidden.value);
+        return entry;
+      };
+
+      const hydrateShiftLists = () => {
+        document.querySelectorAll(".shift-list").forEach((list) => {
+          const side = list.dataset.shiftSide;
+          const dayIndex = list.dataset.dayIndex;
+          const entries = Array.from(list.querySelectorAll(".shift-entry"));
+          entries.forEach((entry, idx) => {
+            const hidden =
+              entry.querySelector("input[data-shift-input]") ||
+              entry.querySelector("input[type='time']");
+            const storedValue =
+              hidden?.value || entry.querySelector("[data-shift-display]")?.dataset.rawValue || "";
+            const replacement = buildShiftEntry(dayIndex, idx, side, storedValue);
+            entry.replaceWith(replacement);
+          });
+        });
+      };
+
+      const normalizeShiftIndexes = (dayIndex) => {
+        document
+          .querySelectorAll(`.shift-list[data-day-index="${dayIndex}"] .shift-entry`)
+          .forEach((entry, idx) => {
+            entry.dataset.shiftIndex = idx;
+            entry
+              .querySelectorAll(
+                "[data-shift-display],[data-shift-input],.time-picker,.time-clear,.time-apply,.shift-remove"
+              )
+              .forEach((node) => {
+                if (node?.dataset) {
+                  node.dataset.shiftIndex = idx;
+                  node.dataset.dayIndex = dayIndex;
+                }
+              });
+          });
+      };
+
+      const handleTimeDisplayClick = (target) => {
+        if (!isEditing) {
+          return;
+        }
+        const { dayIndex, shiftIndex } = target.dataset;
+        const side = target.dataset.shiftDisplay;
+        const picker = document.querySelector(
+          `.time-picker[data-day-index="${dayIndex}"][data-shift-index="${shiftIndex}"][data-side="${side}"]`
+        );
+        openPicker(picker, target);
+      };
+
+      const addShift = (dayIndex) => {
+        const startList = document.querySelector(
+          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="start"]`
+        );
+        const endList = document.querySelector(
+          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="end"]`
+        );
+        if (!startList || !endList) {
+          return;
+        }
+        const nextIndex = startList.querySelectorAll(".shift-entry").length;
+        const startEntry = buildShiftEntry(dayIndex, nextIndex, "start");
+        const endEntry = buildShiftEntry(dayIndex, nextIndex, "end");
+        startList.appendChild(startEntry);
+        endList.appendChild(endEntry);
+        normalizeShiftIndexes(dayIndex);
+        syncShiftControlStates();
+        updateShiftHours(dayIndex);
+        if (isEditing) {
+          const display = startEntry.querySelector("[data-shift-display]");
+          handleTimeDisplayClick(display);
+        }
+      };
+
+      const removeShift = (dayIndex, shiftIndex) => {
+        const startList = document.querySelector(
+          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="start"]`
+        );
+        const endList = document.querySelector(
+          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="end"]`
+        );
+        if (!startList || !endList) {
+          return;
+        }
+        const startEntry = startList.querySelector(
+          `.shift-entry[data-shift-index="${shiftIndex}"]`
+        );
+        const endEntry = endList.querySelector(
+          `.shift-entry[data-shift-index="${shiftIndex}"]`
+        );
+        if (startEntry && activePicker && startEntry.contains(activePicker)) {
+          closeActivePicker();
+        }
+        startEntry?.remove();
+        endEntry?.remove();
+
+        if (!startList.querySelector(".shift-entry")) {
+          const fallbackStart = buildShiftEntry(dayIndex, 0, "start");
+          const fallbackEnd = buildShiftEntry(dayIndex, 0, "end");
+          startList.appendChild(fallbackStart);
+          endList.appendChild(fallbackEnd);
+        }
+
+        normalizeShiftIndexes(dayIndex);
+        syncShiftControlStates();
+        updateShiftHours(dayIndex);
+      };
+
+      const syncShiftControlStates = () => {
+        document.querySelectorAll(".shift-add").forEach((btn) => {
+          btn.disabled = !isEditing;
+        });
+        document.querySelectorAll(".shift-remove").forEach((btn) => {
+          btn.disabled = !isEditing;
+        });
+        if (!isEditing) {
+          closeActivePicker();
+        }
+      };
+
+      const setEditing = (state) => {
+        isEditing = state;
+        document.body.classList.toggle("is-editing", isEditing);
+        editableNodes.forEach((node) => {
+          const lockDate =
+            node.dataset.weekStart !== undefined ||
+            node.dataset.weekEnd !== undefined;
+          node.contentEditable = isEditing && !lockDate ? "true" : "false";
+          node.setAttribute("spellcheck", "false");
+        });
+        syncShiftControlStates();
+        if (titleSelect) {
+          titleSelect.disabled = !isEditing;
+        }
+        if (titleMenuToggle) {
+          titleMenuToggle.disabled = !isEditing;
+        }
+        if (titleClearButton) {
+          titleClearButton.disabled = !isEditing || selectedTitles.length === 0;
+        }
+        if (!isEditing) {
+          closeTitleMenu();
+        }
+        signaturePads.forEach((pad) => pad.setEnabled(isEditing));
+        if (isEditing) {
+          requestAnimationFrame(() => {
+            signaturePads.forEach((pad) => pad.resize());
+          });
+        }
+        commitTitleChanges();
+        toggleEditingButton.textContent = isEditing ? "Lock Timesheet" : "Enable Editing";
+        if (!isEditing && weekDatePicker?.isOpen()) {
+          weekDatePicker.close();
+        }
+      };
+
+      const applyWeekStart = (startDate) => {
+        if (!weekStartSpan || !weekEndSpan || !startDate) {
+          return;
+        }
+        const base = new Date(
+          startDate.getFullYear(),
+          startDate.getMonth(),
+          startDate.getDate()
+        );
+        weekStartSpan.textContent = formatSlash(base);
+        if (weekStartInput) {
+          weekStartInput.value = formatISO(base);
+        }
+
+        const weekEndDate = new Date(base);
+        weekEndDate.setDate(base.getDate() + 6);
+        weekEndSpan.textContent = formatSlash(weekEndDate);
+
+        if (employeeSignatureDateSpan) {
+          employeeSignatureDateSpan.textContent = formatHyphen(base);
+        }
+
+        if (supervisorSignatureDateSpan) {
+          supervisorSignatureDateSpan.textContent = formatHyphen(weekEndDate);
+        }
+
+        dateCells.forEach((cell) => {
+          const offset = parseInt(cell.dataset.dayOffset || "0", 10);
+          const cellDate = new Date(base);
+          cellDate.setDate(base.getDate() + offset);
+          cell.textContent = formatHyphen(cellDate);
+        });
+
+        if (weekDatePicker) {
+          weekDatePicker.setSelected(base);
+        }
+      };
+
+      const ensureInitialWeek = () => {
+        let initial = parseDisplayDate(weekStartSpan?.textContent || "");
+        if (!initial) {
+          initial = startOfWeek(new Date());
+        }
+        applyWeekStart(initial);
+      };
+
+      const hydrateAndInit = () => {
+        hydrateShiftLists();
+        recalcAllDayHours();
+      };
+
+      weekStartSpan?.addEventListener("click", () => {
+        if (!isEditing) {
+          return;
+        }
+        const current =
+          parseDisplayDate(weekStartSpan.textContent) || startOfWeek(new Date());
+        if (!weekDatePicker) {
+          return;
+        }
+        weekDatePicker.setSelected(current);
+        weekDatePicker.open(weekStartSpan, current);
+      });
+
+      weekStartSpan?.addEventListener("blur", () => {
+        if (!isEditing) {
+          return;
+        }
+        const parsed = parseDisplayDate(weekStartSpan.textContent);
+        if (parsed) {
+          applyWeekStart(parsed);
+        }
+      });
+
+      weekStartInput?.addEventListener("change", (event) => {
+        const value = event.target.value;
+        if (!value) {
+          return;
+        }
+        const selected = new Date(value);
+        if (!Number.isNaN(selected.getTime())) {
+          applyWeekStart(selected);
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (
+          isTitleMenuOpen &&
+          titleMenuWrapper &&
+          !titleMenuWrapper.contains(target) &&
+          !titleMenuToggle?.contains(target)
+        ) {
+          closeTitleMenu();
+        }
+        if (weekDatePicker?.isOpen() && weekDatePicker.element.contains(target)) {
+          return;
+        }
+        if (target.matches("[data-shift-display]")) {
+          handleTimeDisplayClick(target);
+        } else if (target.matches(".shift-add")) {
+          event.preventDefault();
+          if (!isEditing) {
+            return;
+          }
+          addShift(target.dataset.dayIndex);
+        } else if (target.matches(".shift-remove")) {
+          event.preventDefault();
+          if (!isEditing) {
+            return;
+          }
+          removeShift(target.dataset.dayIndex, target.dataset.shiftIndex);
+        } else if (target.matches(".time-option")) {
+          const picker = target.closest(".time-picker");
+          if (!picker || !isEditing) {
+            return;
+          }
+          setPickerSelection(picker, target.dataset.type, target.dataset.value);
+        } else if (target.matches(".time-clear")) {
+          event.preventDefault();
+          const picker = target.closest(".time-picker");
+          if (picker && isEditing) {
+            clearPickerSelection(picker);
+          }
+        } else if (target.matches(".time-apply")) {
+          event.preventDefault();
+          const picker = target.closest(".time-picker");
+          if (picker && isEditing) {
+            applyPickerSelection(picker);
+          }
+        } else if (
+          activePicker &&
+          !activePicker.contains(target) &&
+          (!activePicker._anchor || !activePicker._anchor.contains(target))
+        ) {
+          closeActivePicker();
+        }
+
+        if (
+          isEditing &&
+          !target.closest(
+            "button, input, select, textarea, .title-field, .time-picker, .date-picker, .signature-pad-wrapper, .signature-pad-controls"
+          )
+        ) {
+          const activeEditable = target.closest(
+            "[data-editable][contenteditable='true']"
+          );
+          if (!activeEditable) {
+            const labelCell = target.closest(".info-table td.label");
+            if (labelCell) {
+              focusEditableIn(labelCell.nextElementSibling);
+            } else if (target.closest(".contact-label")) {
+              const nextField = target.closest(".contact-label")?.nextElementSibling;
+              focusEditableIn(nextField);
+            } else if (target.closest(".signature-card .label")) {
+              focusEditableIn(target.closest(".signature-card .label")?.nextElementSibling);
+            } else {
+              focusEditableIn(
+                target.closest(
+                  ".dash-field, .info-table td.value, .signature-card .value, .timesheet-table td"
+                )
+              );
+            }
+          }
+        }
+
+        if (
+          weekDatePicker?.isOpen() &&
+          target !== weekStartSpan &&
+          !weekDatePicker.element.contains(target)
+        ) {
+          weekDatePicker.close();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeActivePicker();
+          if (weekDatePicker?.isOpen()) {
+            weekDatePicker.close();
+          }
+          if (isTitleMenuOpen) {
+            closeTitleMenu();
+          }
+        }
+      });
+
+      weekDatePicker = createDatePicker();
+      weekDatePicker.setOnSelect((date) => {
+        if (date) {
+          applyWeekStart(startOfWeek(date));
+        }
+      });
+
+      ensureInitialWeek();
+      hydrateAndInit();
+      setEditing(false);
+
+      toggleEditingButton?.addEventListener("click", () => {
+        setEditing(!isEditing);
+      });
+
+      pageSizeButton?.addEventListener("click", () => {
+        const next = currentPageSize === "A3" ? "A4" : "A3";
+        applyPageSize(next);
+      });
+
+      printButton?.addEventListener("click", () => {
+        window.print();
+      });
+    });
+  </script>
+</body>
+</html>
+
