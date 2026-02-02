@@ -8,7 +8,7 @@
   @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Playfair+Display:wght@600;700&display=swap");
 
 @page {
-  size: A4;
+  size: auto;
   margin: 0;
 }
 
@@ -1338,18 +1338,18 @@ body:not(.is-editing) .title-menu-toggle {
       position: fixed;
       left: 0;
       right: 0;
-      height: 8mm;
+      height: 3mm;
       background: #fff;
       z-index: 9999;
       pointer-events: none;
     }
 
     body::before {
-      top: -2mm;
+      top: -1mm;
     }
 
     body::after {
-      bottom: -2mm;
+      bottom: -1mm;
     }
 
     .controls,
@@ -1365,18 +1365,18 @@ body:not(.is-editing) .title-menu-toggle {
     }
 
     .page {
-      width: calc(210mm - 8mm);
-      max-width: 800px;
-      margin: 2mm auto;
+      width: 100%;
+      max-width: none;
+      margin: 0;
       min-height: auto;
       box-shadow: none;
-      border-radius: 14px;
+      border-radius: 0;
     }
 
     body.page-a3 .page {
-      width: calc(297mm - 8mm);
-      max-width: 1080px;
-      margin: 2mm auto;
+      width: 100%;
+      max-width: none;
+      margin: 0;
     }
 
     .sheet-header {
