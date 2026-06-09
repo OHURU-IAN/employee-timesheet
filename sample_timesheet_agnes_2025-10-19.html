@@ -1,4 +1,4 @@
-2 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,7 @@
   @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Playfair+Display:wght@600;700&display=swap");
 
 @page {
-  size: auto;
+  size: A4;
   margin: 0;
 }
 
@@ -118,6 +118,8 @@
 
   .document {
     flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
     padding: 0 48px;
     padding-bottom: 52px;
   }
@@ -561,6 +563,7 @@
 
   .timesheet-table {
     width: 100%;
+    flex: 1 1 auto;
     border: 2px solid var(--border);
     border-collapse: collapse;
     font-size: 13px;
@@ -585,6 +588,15 @@
     width: 95px;
     text-align: center;
     font-weight: 600;
+  }
+
+  .shift-hours-entry {
+    justify-content: center;
+  }
+
+  .shift-hours-entry span {
+    min-width: 48px;
+    text-align: center;
   }
 
   .timesheet-table td[data-date-cell="true"] {
@@ -614,6 +626,7 @@
     align-items: center;
     gap: 8px;
     position: relative;
+    min-height: 24px;
   }
 
   .shift-entry span {
@@ -809,21 +822,35 @@
 
   .shift-remove {
     display: none;
-    position: absolute;
-    right: -6px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    color: #b04141;
-    font-size: 16px;
-    line-height: 1;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(176, 65, 65, 0.22);
+    border-radius: 8px;
+    background: rgba(176, 65, 65, 0.08);
+    color: #a62f2f;
     cursor: pointer;
-    padding: 0;
+    padding: 6px;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
   }
 
-  body.is-editing .shift-entry:hover .shift-remove {
+  .shift-remove svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    pointer-events: none;
+  }
+
+  body.is-editing .shift-remove {
     display: inline-flex;
+  }
+
+  body.is-editing .shift-remove:hover {
+    background: #a62f2f;
+    color: #fff;
+    transform: translateY(-1px);
   }
 
   .time-input {
@@ -862,9 +889,15 @@
   }
 
   .table-scroll {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     overflow-x: auto;
     overflow-y: visible;
+    /* Grow to absorb the leftover vertical space so the days table fills the
+       page instead of leaving a large empty gap above the footer. */
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .table-scroll::-webkit-scrollbar {
@@ -1050,14 +1083,13 @@ body.is-editing .signature-pad-wrapper {
   }
 
   [data-editable][contenteditable="true"] {
-      outline: none;
-      box-shadow: inset 0 -2px 0 rgba(247, 148, 29, 0.7);
-      caret-color: var(--orange-dark);
-    }
+    outline: none;
+    box-shadow: inset 0 -2px 0 rgba(247, 148, 29, 0.7);
+  }
 
   body.is-editing [data-editable][contenteditable="true"] {
-      position: relative;
-    }
+    position: relative;
+  }
 
   body.is-editing [data-editable][contenteditable="true"]::before {
     content: "";
@@ -1092,34 +1124,8 @@ body.is-editing .signature-pad-wrapper {
   }
 
   body.is-editing .dash-field [data-editable][contenteditable="true"]::before {
-      content: none;
-    }
-
-  body.is-editing [data-editable][contenteditable="true"]:focus-visible::after,
-  body.is-editing [data-editable][contenteditable="true"]:focus::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 2px;
-      width: 2px;
-      height: 1.2em;
-      background: var(--orange);
-      border-radius: 2px;
-      animation: caretBlink 1s steps(2, start) infinite;
-      pointer-events: none;
-    }
-
-  @keyframes caretBlink {
-      0% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
-    }
+    content: none;
+  }
 
   body.is-editing .info-table td,
   body.is-editing .timesheet-table td,
@@ -1160,8 +1166,31 @@ body:not(.is-editing) .title-menu-toggle {
       padding: 0 12px;
     }
 
+    /* On phones the three action buttons no longer fit in a fixed top-right
+       row (the Print button was being clipped off-screen). Turn them into a
+       full-width sticky bar that wraps and stays reachable while scrolling. */
+    .controls {
+      position: sticky;
+      top: 0;
+      right: auto;
+      width: auto;
+      margin: 0 -12px 4px;
+      padding: 10px 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(237, 240, 250, 0.96);
+      box-shadow: 0 2px 10px rgba(17, 25, 58, 0.12);
+    }
+
+    .controls button {
+      white-space: nowrap;
+      min-height: 44px;
+      padding: 10px 16px;
+    }
+
     .page {
-      margin: 24px auto 36px;
+      margin: 12px auto 36px;
       min-height: auto;
       border-radius: 12px;
     }
@@ -1221,10 +1250,8 @@ body:not(.is-editing) .title-menu-toggle {
     }
 
     .contact-line {
-      grid-template-columns: min-content minmax(0, 1fr);
-      column-gap: 10px;
-      row-gap: 8px;
-      align-items: center;
+      grid-template-columns: 1fr;
+      row-gap: 6px;
     }
 
     .contact-line .contact-label {
@@ -1296,31 +1323,303 @@ body:not(.is-editing) .title-menu-toggle {
       font-size: inherit;
     }
 
-    .signature-card .row:first-child {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 10px;
-    }
-
-    .signature-card .row:first-child .label.signature-label {
-      width: 100%;
-      white-space: normal;
-    }
-
-    .signature-card .row:first-child .value.signature-with-pad {
-      width: 100%;
-    }
-
-    .signature-pad-wrapper {
-      padding: 12px 14px;
-    }
-
-    .signature-pad-canvas {
-      height: 190px;
-    }
-
     .sheet-footer {
       padding: 18px 24px 20px;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    /* ============================================================
+       PHONE CARD REFLOW (screen only, <=768px).
+       Turns both tables into stacked, labelled cards so nothing
+       requires sideways scrolling. These rules live entirely inside
+       this screen media query, so the print output and the desktop /
+       tablet layouts are completely unaffected.
+       ============================================================ */
+
+    /* --- Info table -> stacked label / value cards --- */
+    .info-table-scroll {
+      overflow-x: visible;
+      padding-bottom: 0;
+    }
+
+    .info-table {
+      display: block;
+      min-width: 0;
+      border: none;
+      margin: 16px 0;
+    }
+
+    .info-table tbody {
+      display: block;
+    }
+
+    .info-table tr {
+      display: block;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 2px 14px 10px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+
+    .info-table td {
+      display: block;
+      width: auto;
+      border: none;
+      padding: 0;
+    }
+
+    .info-table td.label {
+      background: none;
+      width: auto;
+      padding: 10px 0 2px;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+    }
+
+    .info-table td.value {
+      padding: 0 0 6px;
+      border-bottom: 1px solid rgba(17, 25, 58, 0.12);
+      min-height: 22px;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .info-table tr.contact-lines-row {
+      padding: 8px 14px 12px;
+    }
+
+    .info-table tr.contact-lines-row td {
+      padding: 0;
+    }
+
+    .contact-lines {
+      min-width: 0;
+      padding: 0;
+    }
+
+    .contact-line {
+      grid-template-columns: 1fr;
+      column-gap: 0;
+      row-gap: 4px;
+    }
+
+    .contact-line .contact-label {
+      width: auto;
+      padding-top: 8px;
+    }
+
+    /* --- Days table -> one card per day --- */
+    .table-scroll {
+      overflow-x: visible;
+    }
+
+    .timesheet-table {
+      display: block;
+      height: auto;
+      min-width: 0;
+      border: none;
+    }
+
+    .timesheet-table thead {
+      display: none;
+    }
+
+    .timesheet-table tbody,
+    .timesheet-table tfoot {
+      display: block;
+    }
+
+    .timesheet-table tbody tr {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px 62px;
+      margin-bottom: 12px;
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timesheet-table tbody td {
+      display: block;
+      border: none;
+      padding: 8px 0;
+      text-align: left;
+      min-width: 0;
+    }
+
+    .timesheet-table tbody td:nth-child(1),
+    .timesheet-table tbody td:nth-child(2) {
+      grid-column: 1 / -1;
+      border-bottom: 1px solid rgba(17, 25, 58, 0.1);
+    }
+
+    .timesheet-table tbody td:nth-child(3),
+    .timesheet-table tbody td:nth-child(4),
+    .timesheet-table tbody td:nth-child(5) {
+      padding: 10px 8px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: #fffaf4;
+    }
+
+    .timesheet-table tbody td:nth-child(3) {
+      border-left: 1px solid var(--border);
+      border-radius: 8px 0 0 8px;
+    }
+
+    .timesheet-table tbody td:nth-child(4) {
+      border-left: 1px solid rgba(17, 25, 58, 0.14);
+    }
+
+    .timesheet-table tbody td:nth-child(5) {
+      border-left: 1px solid rgba(17, 25, 58, 0.14);
+      border-right: 1px solid var(--border);
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* Field labels, derived from the fixed column order */
+    .timesheet-table tbody td:nth-child(n + 2)::before {
+      display: block;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gray-text);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .timesheet-table tbody td:nth-child(2)::before {
+      content: "Date";
+    }
+
+    .timesheet-table tbody td:nth-child(3)::before {
+      content: "Start Time";
+    }
+
+    .timesheet-table tbody td:nth-child(4)::before {
+      content: "End Time";
+    }
+
+    .timesheet-table tbody td:nth-child(5)::before {
+      content: "Hours";
+    }
+
+    /* First cell (the day name) becomes the card title */
+    .timesheet-table tbody td:nth-child(1) {
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid var(--border);
+      padding: 0 0 8px;
+      margin-bottom: 4px;
+    }
+
+    .timesheet-table tbody .shift-list {
+      gap: 0;
+      min-height: 34px;
+    }
+
+    .timesheet-table tbody .shift-entry {
+      justify-content: center;
+      gap: 4px;
+      min-height: 38px;
+      padding: 5px 0;
+      border-bottom: 1px dashed rgba(45, 41, 100, 0.2);
+    }
+
+    .timesheet-table tbody .shift-entry:last-child {
+      border-bottom: none;
+    }
+
+    .timesheet-table tbody .shift-entry span {
+      min-width: 0;
+      width: 100%;
+      font-size: 11px;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .timesheet-table tbody .shift-hours-entry {
+      gap: 2px;
+    }
+
+    .timesheet-table tbody .shift-hours-entry span {
+      flex: 1 1 auto;
+    }
+
+    .timesheet-table tbody .shift-remove {
+      flex-basis: 28px;
+      width: 28px;
+      height: 28px;
+      padding: 6px;
+    }
+
+    .timesheet-table tbody .shift-add {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      width: auto;
+      margin: 0;
+      min-height: 38px;
+      justify-content: center;
+    }
+
+    .time-picker {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: min(92vw, 340px);
+      min-width: 0;
+      max-height: min(72vh, 480px);
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      padding: 14px;
+      border-radius: 16px;
+    }
+
+    .time-picker.active {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .time-column {
+      max-height: 230px;
+      padding-right: 6px;
+      scrollbar-width: thin;
+    }
+
+    .time-option {
+      min-height: 36px;
+      padding: 8px 4px;
+    }
+
+    /* Total row */
+    .timesheet-table tfoot tr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: rgba(45, 41, 100, 0.06);
+      font-weight: 700;
+    }
+
+    .timesheet-table tfoot td {
+      display: block;
+      border: none;
+      padding: 0;
+    }
+
+    .timesheet-table tfoot td.hours {
+      text-align: right;
     }
   }
 
@@ -1329,7 +1628,7 @@ body:not(.is-editing) .title-menu-toggle {
       margin: 0;
       background: #fff;
       -webkit-print-color-adjust: exact;
-      font-size: 11px;
+      font-size: 12px;
     }
 
     body::before,
@@ -1338,18 +1637,18 @@ body:not(.is-editing) .title-menu-toggle {
       position: fixed;
       left: 0;
       right: 0;
-      height: 3mm;
+      height: 8mm;
       background: #fff;
       z-index: 9999;
       pointer-events: none;
     }
 
     body::before {
-      top: -1mm;
+      top: -2mm;
     }
 
     body::after {
-      bottom: -1mm;
+      bottom: -2mm;
     }
 
     .controls,
@@ -1365,40 +1664,31 @@ body:not(.is-editing) .title-menu-toggle {
     }
 
     .page {
-      width: 100%;
-      max-width: none;
-      margin: 0;
-      min-height: auto;
+      width: calc(210mm - 8mm);
+      max-width: 800px;
+      margin: 4mm auto;
+      min-height: calc(297mm - 12mm);
       box-shadow: none;
-      border-radius: 0;
+      border-radius: 14px;
     }
 
     body.page-a3 .page {
-      width: 100%;
-      max-width: none;
-      margin: 0;
+      width: calc(297mm - 8mm);
+      max-width: 1080px;
+      margin: 4mm auto;
+      min-height: calc(420mm - 12mm);
     }
 
     .sheet-header {
-      padding: 20px 24px 8px;
-    }
-
-    .title-bar {
-      margin: 8px 0 10px;
-    }
-
-    .title-bar h1 {
-      font-size: 18px;
-      padding: 8px 28px;
+      padding: 28px 24px 12px;
     }
 
     .info-table {
-      margin: 18px 0 16px;
-      font-size: 11px;
+      font-size: 12px;
     }
 
     .info-table td {
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-color: #000;
     }
 
@@ -1436,40 +1726,29 @@ body:not(.is-editing) .title-menu-toggle {
     }
 
     .document {
-      padding: 0 24px 4px;
+      padding: 0 28px 6px;
     }
 
     .sheet-footer {
-      padding: 4px 24px 0;
+      padding: 6px 28px 0;
     }
 
     .table-scroll {
       overflow: visible !important;
     }
 
-    .timesheet-table th,
-    .timesheet-table td {
-      font-size: 11px;
-      padding: 6px 8px;
-    }
-
-    .shift-entry span {
-      min-width: 64px;
-      font-size: 11px;
-    }
-
     .signatures {
       page-break-inside: avoid;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin: 10px 0 4px;
+      gap: 14px;
+      margin: 14px 0 6px;
     }
 
     .signature-card {
       border: 2px solid var(--border);
       border-radius: 12px;
-      padding: 14px 18px;
+      padding: 18px 22px;
     }
 
     .signature-card .row {
@@ -1477,7 +1756,7 @@ body:not(.is-editing) .title-menu-toggle {
       align-items: center;
       justify-content: flex-start;
       gap: 6px;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
     .signature-card .row:last-child {
@@ -1496,27 +1775,8 @@ body:not(.is-editing) .title-menu-toggle {
       min-width: 120px;
     }
 
-    .signature-card .value.signature-with-pad {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-    }
-
     .signature-pad-wrapper {
-      display: none !important;
       width: 100%;
-    }
-
-    .signature-preview {
-      display: none;
-      margin-left: 0;
-      max-height: 32px;
-      max-width: 180px;
-    }
-
-    .signature-preview.is-visible {
-      display: inline-block !important;
     }
   }
 
@@ -1532,7 +1792,7 @@ body:not(.is-editing) .title-menu-toggle {
   <div class="page">
     <header class="sheet-header">
       <div class="header-art">
-        <img src="header aimex.png" alt="Aimex Homecare Services header artwork">
+        <img src="header-aimex.png" alt="Aimex Homecare Services header artwork">
       </div>
     </header>
 
@@ -1618,13 +1878,13 @@ body:not(.is-editing) .title-menu-toggle {
           </tr>
         </thead>
         <tbody>
-          <tr><td><span data-editable="true">Sunday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="0"></span></td><td><div class="shift-list" data-day-index="0" data-shift-side="start"><div class="shift-entry" data-day-index="0" data-shift-index="0"><span data-shift-display="start" data-day-index="0" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="0" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="0" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="0">+ Add Shift</button></td><td><div class="shift-list" data-day-index="0" data-shift-side="end"><div class="shift-entry" data-day-index="0" data-shift-index="0"><span data-shift-display="end" data-day-index="0" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="0" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="0">0.00</span></td></tr>
-          <tr><td><span data-editable="true">Monday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="1"></span></td><td><div class="shift-list" data-day-index="1" data-shift-side="start"><div class="shift-entry" data-day-index="1" data-shift-index="0"><span data-shift-display="start" data-day-index="1" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="1" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="1" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="1">+ Add Shift</button></td><td><div class="shift-list" data-day-index="1" data-shift-side="end"><div class="shift-entry" data-day-index="1" data-shift-index="0"><span data-shift-display="end" data-day-index="1" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="1" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="1">0.00</span></td></tr>
-          <tr><td><span data-editable="true">Tuesday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="2"></span></td><td><div class="shift-list" data-day-index="2" data-shift-side="start"><div class="shift-entry" data-day-index="2" data-shift-index="0"><span data-shift-display="start" data-day-index="2" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="2" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="2" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="2">+ Add Shift</button></td><td><div class="shift-list" data-day-index="2" data-shift-side="end"><div class="shift-entry" data-day-index="2" data-shift-index="0"><span data-shift-display="end" data-day-index="2" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="2" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="2">0.00</span></td></tr>
-          <tr><td><span data-editable="true">Wednesday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="3"></span></td><td><div class="shift-list" data-day-index="3" data-shift-side="start"><div class="shift-entry" data-day-index="3" data-shift-index="0"><span data-shift-display="start" data-day-index="3" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="3" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="3" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="3">+ Add Shift</button></td><td><div class="shift-list" data-day-index="3" data-shift-side="end"><div class="shift-entry" data-day-index="3" data-shift-index="0"><span data-shift-display="end" data-day-index="3" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="3" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="3">0.00</span></td></tr>
-          <tr><td><span data-editable="true">Thursday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="4"></span></td><td><div class="shift-list" data-day-index="4" data-shift-side="start"><div class="shift-entry" data-day-index="4" data-shift-index="0"><span data-shift-display="start" data-day-index="4" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="4" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="4" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="4">+ Add Shift</button></td><td><div class="shift-list" data-day-index="4" data-shift-side="end"><div class="shift-entry" data-day-index="4" data-shift-index="0"><span data-shift-display="end" data-day-index="4" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="4" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="4">0.00</span></td></tr>
-          <tr><td><span data-editable="true">Friday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="5"></span></td><td><div class="shift-list" data-day-index="5" data-shift-side="start"><div class="shift-entry" data-day-index="5" data-shift-index="0"><span data-shift-display="start" data-day-index="5" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="5" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="5" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="5">+ Add Shift</button></td><td><div class="shift-list" data-day-index="5" data-shift-side="end"><div class="shift-entry" data-day-index="5" data-shift-index="0"><span data-shift-display="end" data-day-index="5" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="5" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="5">0.00</span></td></tr>
-          <tr><td><span data-editable="true">Saturday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="6"></span></td><td><div class="shift-list" data-day-index="6" data-shift-side="start"><div class="shift-entry" data-day-index="6" data-shift-index="0"><span data-shift-display="start" data-day-index="6" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="6" data-shift-index="0" value=""><button type="button" class="shift-remove" data-day-index="6" data-shift-index="0">&times;</button></div></div><button type="button" class="shift-add" data-day-index="6">+ Add Shift</button></td><td><div class="shift-list" data-day-index="6" data-shift-side="end"><div class="shift-entry" data-day-index="6" data-shift-index="0"><span data-shift-display="end" data-day-index="6" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="6" data-shift-index="0" value=""></div></div></td><td class="hours"><span data-day-hours="true" data-hours-cell="true" data-day-index="6">0.00</span></td></tr>
+          <tr><td><span data-editable="true">Sunday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="0"></span></td><td><div class="shift-list" data-day-index="0" data-shift-side="start"><div class="shift-entry" data-day-index="0" data-shift-index="0"><span data-shift-display="start" data-day-index="0" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="0" data-shift-index="0" value=""></div></div><button type="button" class="shift-add" data-day-index="0">+ Add Shift</button></td><td><div class="shift-list" data-day-index="0" data-shift-side="end"><div class="shift-entry" data-day-index="0" data-shift-index="0"><span data-shift-display="end" data-day-index="0" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="0" data-shift-index="0" value=""></div></div></td><td class="hours"><div class="shift-list hours-list" data-day-index="0" data-shift-side="hours"><div class="shift-entry shift-hours-entry" data-day-index="0" data-shift-index="0"><span data-shift-hours="true" data-day-index="0" data-shift-index="0">0.00</span><button type="button" class="shift-remove" data-day-index="0" data-shift-index="0" aria-label="Remove shift" title="Remove shift"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button></div></div></td></tr>
+          <tr><td><span data-editable="true">Monday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="1"></span></td><td><div class="shift-list" data-day-index="1" data-shift-side="start"><div class="shift-entry" data-day-index="1" data-shift-index="0"><span data-shift-display="start" data-day-index="1" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="1" data-shift-index="0" value=""></div></div><button type="button" class="shift-add" data-day-index="1">+ Add Shift</button></td><td><div class="shift-list" data-day-index="1" data-shift-side="end"><div class="shift-entry" data-day-index="1" data-shift-index="0"><span data-shift-display="end" data-day-index="1" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="1" data-shift-index="0" value=""></div></div></td><td class="hours"><div class="shift-list hours-list" data-day-index="1" data-shift-side="hours"><div class="shift-entry shift-hours-entry" data-day-index="1" data-shift-index="0"><span data-shift-hours="true" data-day-index="1" data-shift-index="0">0.00</span><button type="button" class="shift-remove" data-day-index="1" data-shift-index="0" aria-label="Remove shift" title="Remove shift"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button></div></div></td></tr>
+          <tr><td><span data-editable="true">Tuesday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="2"></span></td><td><div class="shift-list" data-day-index="2" data-shift-side="start"><div class="shift-entry" data-day-index="2" data-shift-index="0"><span data-shift-display="start" data-day-index="2" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="2" data-shift-index="0" value=""></div></div><button type="button" class="shift-add" data-day-index="2">+ Add Shift</button></td><td><div class="shift-list" data-day-index="2" data-shift-side="end"><div class="shift-entry" data-day-index="2" data-shift-index="0"><span data-shift-display="end" data-day-index="2" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="2" data-shift-index="0" value=""></div></div></td><td class="hours"><div class="shift-list hours-list" data-day-index="2" data-shift-side="hours"><div class="shift-entry shift-hours-entry" data-day-index="2" data-shift-index="0"><span data-shift-hours="true" data-day-index="2" data-shift-index="0">0.00</span><button type="button" class="shift-remove" data-day-index="2" data-shift-index="0" aria-label="Remove shift" title="Remove shift"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button></div></div></td></tr>
+          <tr><td><span data-editable="true">Wednesday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="3"></span></td><td><div class="shift-list" data-day-index="3" data-shift-side="start"><div class="shift-entry" data-day-index="3" data-shift-index="0"><span data-shift-display="start" data-day-index="3" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="3" data-shift-index="0" value=""></div></div><button type="button" class="shift-add" data-day-index="3">+ Add Shift</button></td><td><div class="shift-list" data-day-index="3" data-shift-side="end"><div class="shift-entry" data-day-index="3" data-shift-index="0"><span data-shift-display="end" data-day-index="3" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="3" data-shift-index="0" value=""></div></div></td><td class="hours"><div class="shift-list hours-list" data-day-index="3" data-shift-side="hours"><div class="shift-entry shift-hours-entry" data-day-index="3" data-shift-index="0"><span data-shift-hours="true" data-day-index="3" data-shift-index="0">0.00</span><button type="button" class="shift-remove" data-day-index="3" data-shift-index="0" aria-label="Remove shift" title="Remove shift"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button></div></div></td></tr>
+          <tr><td><span data-editable="true">Thursday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="4"></span></td><td><div class="shift-list" data-day-index="4" data-shift-side="start"><div class="shift-entry" data-day-index="4" data-shift-index="0"><span data-shift-display="start" data-day-index="4" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="4" data-shift-index="0" value=""></div></div><button type="button" class="shift-add" data-day-index="4">+ Add Shift</button></td><td><div class="shift-list" data-day-index="4" data-shift-side="end"><div class="shift-entry" data-day-index="4" data-shift-index="0"><span data-shift-display="end" data-day-index="4" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="4" data-shift-index="0" value=""></div></div></td><td class="hours"><div class="shift-list hours-list" data-day-index="4" data-shift-side="hours"><div class="shift-entry shift-hours-entry" data-day-index="4" data-shift-index="0"><span data-shift-hours="true" data-day-index="4" data-shift-index="0">0.00</span><button type="button" class="shift-remove" data-day-index="4" data-shift-index="0" aria-label="Remove shift" title="Remove shift"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button></div></div></td></tr>
+          <tr><td><span data-editable="true">Friday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="5"></span></td><td><div class="shift-list" data-day-index="5" data-shift-side="start"><div class="shift-entry" data-day-index="5" data-shift-index="0"><span data-shift-display="start" data-day-index="5" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="5" data-shift-index="0" value=""></div></div><button type="button" class="shift-add" data-day-index="5">+ Add Shift</button></td><td><div class="shift-list" data-day-index="5" data-shift-side="end"><div class="shift-entry" data-day-index="5" data-shift-index="0"><span data-shift-display="end" data-day-index="5" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="5" data-shift-index="0" value=""></div></div></td><td class="hours"><div class="shift-list hours-list" data-day-index="5" data-shift-side="hours"><div class="shift-entry shift-hours-entry" data-day-index="5" data-shift-index="0"><span data-shift-hours="true" data-day-index="5" data-shift-index="0">0.00</span><button type="button" class="shift-remove" data-day-index="5" data-shift-index="0" aria-label="Remove shift" title="Remove shift"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button></div></div></td></tr>
+          <tr><td><span data-editable="true">Saturday</span></td><td><span data-editable="true" data-date-cell="true" data-day-offset="6"></span></td><td><div class="shift-list" data-day-index="6" data-shift-side="start"><div class="shift-entry" data-day-index="6" data-shift-index="0"><span data-shift-display="start" data-day-index="6" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="start" data-day-index="6" data-shift-index="0" value=""></div></div><button type="button" class="shift-add" data-day-index="6">+ Add Shift</button></td><td><div class="shift-list" data-day-index="6" data-shift-side="end"><div class="shift-entry" data-day-index="6" data-shift-index="0"><span data-shift-display="end" data-day-index="6" data-shift-index="0" data-raw-value="">--</span><input class="time-input" type="time" data-shift-input="end" data-day-index="6" data-shift-index="0" value=""></div></div></td><td class="hours"><div class="shift-list hours-list" data-day-index="6" data-shift-side="hours"><div class="shift-entry shift-hours-entry" data-day-index="6" data-shift-index="0"><span data-shift-hours="true" data-day-index="6" data-shift-index="0">0.00</span><button type="button" class="shift-remove" data-day-index="6" data-shift-index="0" aria-label="Remove shift" title="Remove shift"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button></div></div></td></tr>
         </tbody>
         <tfoot>
           <tr>
@@ -1639,7 +1899,7 @@ body:not(.is-editing) .title-menu-toggle {
       <section class="signatures">
         <div class="signature-card">
           <div class="row">
-            <span class="label signature-label">Employee <br>Signature:</span>
+              <span class="label signature-label">Employee <br>Signature:</span>
             <span class="value signature-with-pad">
               <span data-editable="true" data-uppercase="true"></span>
               <img class="signature-preview" data-signature-preview="employee" alt="Employee signature preview">
@@ -1659,7 +1919,7 @@ body:not(.is-editing) .title-menu-toggle {
         </div>
         <div class="signature-card">
           <div class="row">
-            <span class="label signature-label">Supervisor <br>Signature:</span>
+              <span class="label signature-label">Supervisor <br>Signature:</span>
             <span class="value signature-with-pad">
               <span data-editable="true" data-uppercase="true"></span>
               <img class="signature-preview" data-signature-preview="supervisor" alt="Supervisor signature preview">
@@ -1683,7 +1943,7 @@ body:not(.is-editing) .title-menu-toggle {
 
     <footer class="sheet-footer">
       <div class="footer-art">
-        <img src="footer aimex.png" alt="Aimex Homecare Services footer artwork">
+        <img src="footer-aimex.png" alt="Aimex Homecare Services footer artwork">
       </div>
       <div class="footer-content">
         <div>Phone Number: <strong>202-868-2214</strong></div>
@@ -2442,11 +2702,14 @@ body:not(.is-editing) .title-menu-toggle {
       applyPageSize(currentPageSize);
 
       const MM_TO_PX = 96 / 25.4;
-      const A4_HEIGHT_PX = 297 * MM_TO_PX;
-      const A4_MARGIN_PX = 16 * MM_TO_PX;
+      const A4_PRINT_HEIGHT_PX = (297 - 10) * MM_TO_PX;
+      const A4_FIT_TOLERANCE_PX = 4;
 
       const ensurePageFits = () => {
-        if (currentPageSize !== "A4") {
+        if (
+          currentPageSize !== "A4" ||
+          !window.matchMedia("print").matches
+        ) {
           return;
         }
         const pageNode = document.querySelector(".page");
@@ -2454,10 +2717,12 @@ body:not(.is-editing) .title-menu-toggle {
           return;
         }
         const contentHeight = pageNode.getBoundingClientRect().height;
-        if (contentHeight > A4_HEIGHT_PX - A4_MARGIN_PX) {
+        if (contentHeight > A4_PRINT_HEIGHT_PX + A4_FIT_TOLERANCE_PX) {
           applyPageSize("A3");
         }
       };
+
+      window.addEventListener("beforeprint", ensurePageFits);
 
   const WEEKDAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
@@ -2621,31 +2886,12 @@ body:not(.is-editing) .title-menu-toggle {
 
       const recalcTotals = () => {
         let total = 0;
-        document.querySelectorAll("[data-day-hours]").forEach((node) => {
+        document.querySelectorAll("[data-shift-hours]").forEach((node) => {
           total += parseHourValue(node.textContent);
         });
         if (hoursDisplay) {
           hoursDisplay.textContent = total.toFixed(2);
         }
-      };
-
-      const collectShiftTimes = (list, side) => {
-        if (!list) {
-          return [];
-        }
-        return Array.from(list.querySelectorAll(".shift-entry")).map(
-          (entry) => {
-            const display = entry.querySelector(
-              `[data-shift-display="${side}"]`
-            );
-            if (!display) {
-              return "";
-            }
-            return normalizeTimeString(
-              display.dataset.rawValue || display.textContent || ""
-            );
-          }
-        );
       };
 
       const updateShiftHours = (dayIndex, shouldUpdateTotal = true) => {
@@ -2656,23 +2902,29 @@ body:not(.is-editing) .title-menu-toggle {
         const endList = document.querySelector(
           `.shift-list[data-day-index="${dayKey}"][data-shift-side="end"]`
         );
-        const startTimes = collectShiftTimes(startList, "start");
-        const endTimes = collectShiftTimes(endList, "end");
-        let totalMinutes = 0;
-        const maxCount = Math.max(startTimes.length, endTimes.length);
-        for (let i = 0; i < maxCount; i += 1) {
-          const startValue = startTimes[i] || "";
-          const endValue = endTimes[i] || "";
-          if (!startValue || !endValue) {
-            continue;
-          }
-          totalMinutes += minutesBetween(startValue, endValue);
-        }
-        const hoursSpan = document.querySelector(
-          `[data-day-hours][data-day-index="${dayKey}"]`
+        const hoursList = document.querySelector(
+          `.shift-list[data-day-index="${dayKey}"][data-shift-side="hours"]`
         );
-        if (hoursSpan) {
-          hoursSpan.textContent = (totalMinutes / 60).toFixed(2);
+        const shiftCount = Math.max(
+          startList?.querySelectorAll(".shift-entry").length || 0,
+          endList?.querySelectorAll(".shift-entry").length || 0,
+          hoursList?.querySelectorAll(".shift-entry").length || 0
+        );
+        for (let i = 0; i < shiftCount; i += 1) {
+          const startValue = document.querySelector(
+            `input[data-shift-input="start"][data-day-index="${dayKey}"][data-shift-index="${i}"]`
+          )?.value || "";
+          const endValue = document.querySelector(
+            `input[data-shift-input="end"][data-day-index="${dayKey}"][data-shift-index="${i}"]`
+          )?.value || "";
+          const hoursSpan = document.querySelector(
+            `[data-shift-hours][data-day-index="${dayKey}"][data-shift-index="${i}"]`
+          );
+          if (hoursSpan) {
+            const minutes =
+              startValue && endValue ? minutesBetween(startValue, endValue) : 0;
+            hoursSpan.textContent = (minutes / 60).toFixed(2);
+          }
         }
         if (shouldUpdateTotal) {
           recalcTotals();
@@ -2845,6 +3097,30 @@ body:not(.is-editing) .title-menu-toggle {
         entry.dataset.dayIndex = dayIndex;
         entry.dataset.shiftIndex = shiftIndex;
 
+        if (side === "hours") {
+          entry.classList.add("shift-hours-entry");
+          const hours = document.createElement("span");
+          hours.dataset.shiftHours = "true";
+          hours.dataset.dayIndex = dayIndex;
+          hours.dataset.shiftIndex = shiftIndex;
+          hours.textContent = "0.00";
+          entry.appendChild(hours);
+
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "shift-remove";
+          remove.dataset.dayIndex = dayIndex;
+          remove.dataset.shiftIndex = shiftIndex;
+          remove.setAttribute("aria-label", "Remove shift");
+          remove.setAttribute("title", "Remove shift");
+          remove.innerHTML =
+            '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+            '<path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/>' +
+            "</svg>";
+          entry.appendChild(remove);
+          return entry;
+        }
+
         const display = document.createElement("span");
         display.dataset.shiftDisplay = side;
         display.dataset.dayIndex = dayIndex;
@@ -2863,53 +3139,129 @@ body:not(.is-editing) .title-menu-toggle {
         const picker = buildTimePicker(dayIndex, shiftIndex, side, value);
         entry.appendChild(picker);
 
-        if (side === "start") {
-          const remove = document.createElement("button");
-          remove.type = "button";
-          remove.className = "shift-remove";
-          remove.dataset.dayIndex = dayIndex;
-          remove.dataset.shiftIndex = shiftIndex;
-          remove.innerHTML = "&times;";
-          entry.appendChild(remove);
-        }
-
         updateTimeDisplayNode(display, hidden.value);
         return entry;
       };
 
       const hydrateShiftLists = () => {
-        document.querySelectorAll(".shift-list").forEach((list) => {
-          const side = list.dataset.shiftSide;
-          const dayIndex = list.dataset.dayIndex;
-          const entries = Array.from(list.querySelectorAll(".shift-entry"));
-          entries.forEach((entry, idx) => {
-            const hidden =
-              entry.querySelector("input[data-shift-input]") ||
-              entry.querySelector("input[type='time']");
-            const storedValue =
-              hidden?.value || entry.querySelector("[data-shift-display]")?.dataset.rawValue || "";
-            const replacement = buildShiftEntry(dayIndex, idx, side, storedValue);
-            entry.replaceWith(replacement);
-          });
+        document.querySelectorAll(".timesheet-table tbody tr").forEach((row) => {
+          const startList = row.querySelector('[data-shift-side="start"]');
+          const endList = row.querySelector('[data-shift-side="end"]');
+          let hoursList = row.querySelector('[data-shift-side="hours"]');
+          if (!startList || !endList) {
+            return;
+          }
+          const dayIndex = startList.dataset.dayIndex;
+          if (!hoursList) {
+            const hoursCell = row.querySelector("td.hours");
+            if (!hoursCell) {
+              return;
+            }
+            hoursList = document.createElement("div");
+            hoursList.className = "shift-list hours-list";
+            hoursList.dataset.dayIndex = dayIndex;
+            hoursList.dataset.shiftSide = "hours";
+            hoursCell.replaceChildren(hoursList);
+          }
+          const readValues = (list) =>
+            Array.from(list.querySelectorAll(".shift-entry")).map((entry) => {
+              const hidden =
+                entry.querySelector("input[data-shift-input]") ||
+                entry.querySelector("input[type='time']");
+              return hidden?.value ||
+                entry.querySelector("[data-shift-display]")?.dataset.rawValue || "";
+            });
+          const starts = readValues(startList);
+          const ends = readValues(endList);
+          const count = Math.max(starts.length, ends.length, 1);
+          startList.replaceChildren();
+          endList.replaceChildren();
+          hoursList.replaceChildren();
+          for (let i = 0; i < count; i += 1) {
+            startList.appendChild(buildShiftEntry(dayIndex, i, "start", starts[i]));
+            endList.appendChild(buildShiftEntry(dayIndex, i, "end", ends[i]));
+            hoursList.appendChild(buildShiftEntry(dayIndex, i, "hours"));
+          }
+        });
+      };
+
+      const getShiftLists = (dayIndex) => ({
+        startList: document.querySelector(
+          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="start"]`
+        ),
+        endList: document.querySelector(
+          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="end"]`
+        ),
+        hoursList: document.querySelector(
+          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="hours"]`
+        ),
+      });
+
+      // Re-number a single list so its Nth entry always carries shift-index N.
+      // Each column is numbered on its own so Start / End / Hours stay paired
+      // by position rather than being flattened into one running sequence.
+      const reindexShiftList = (list, dayIndex) => {
+        if (!list) {
+          return;
+        }
+        Array.from(list.querySelectorAll(".shift-entry")).forEach((entry, idx) => {
+          entry.dataset.shiftIndex = idx;
+          entry.dataset.dayIndex = dayIndex;
+          entry
+            .querySelectorAll(
+              "[data-shift-display],[data-shift-input],[data-shift-hours],.time-picker,.time-clear,.time-apply,.shift-remove"
+            )
+            .forEach((node) => {
+              if (node?.dataset) {
+                node.dataset.shiftIndex = idx;
+                node.dataset.dayIndex = dayIndex;
+              }
+            });
         });
       };
 
       const normalizeShiftIndexes = (dayIndex) => {
+        const { startList, endList, hoursList } = getShiftLists(dayIndex);
+        reindexShiftList(startList, dayIndex);
+        reindexShiftList(endList, dayIndex);
+        reindexShiftList(hoursList, dayIndex);
+      };
+
+      // Keep the three columns the same length by padding the shorter ones with
+      // empty entries, then re-number them. This single function is what makes
+      // an imbalance impossible: any add, remove, or hydrated data is realigned.
+      const balanceShiftLists = (dayIndex) => {
+        const { startList, endList, hoursList } = getShiftLists(dayIndex);
+        if (!startList || !endList || !hoursList) {
+          return;
+        }
+        const target = Math.max(
+          startList.querySelectorAll(".shift-entry").length,
+          endList.querySelectorAll(".shift-entry").length,
+          hoursList.querySelectorAll(".shift-entry").length,
+          1
+        );
+        const padList = (list, side) => {
+          for (
+            let i = list.querySelectorAll(".shift-entry").length;
+            i < target;
+            i += 1
+          ) {
+            list.appendChild(buildShiftEntry(dayIndex, i, side));
+          }
+        };
+        padList(startList, "start");
+        padList(endList, "end");
+        padList(hoursList, "hours");
+        normalizeShiftIndexes(dayIndex);
+      };
+
+      const balanceAllDays = () => {
+        const dayIndexes = new Set();
         document
-          .querySelectorAll(`.shift-list[data-day-index="${dayIndex}"] .shift-entry`)
-          .forEach((entry, idx) => {
-            entry.dataset.shiftIndex = idx;
-            entry
-              .querySelectorAll(
-                "[data-shift-display],[data-shift-input],.time-picker,.time-clear,.time-apply,.shift-remove"
-              )
-              .forEach((node) => {
-                if (node?.dataset) {
-                  node.dataset.shiftIndex = idx;
-                  node.dataset.dayIndex = dayIndex;
-                }
-              });
-          });
+          .querySelectorAll(".shift-list[data-day-index]")
+          .forEach((list) => dayIndexes.add(list.dataset.dayIndex));
+        dayIndexes.forEach((dayIndex) => balanceShiftLists(dayIndex));
       };
 
       const handleTimeDisplayClick = (target) => {
@@ -2925,20 +3277,17 @@ body:not(.is-editing) .title-menu-toggle {
       };
 
       const addShift = (dayIndex) => {
-        const startList = document.querySelector(
-          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="start"]`
-        );
-        const endList = document.querySelector(
-          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="end"]`
-        );
-        if (!startList || !endList) {
+        const { startList, endList, hoursList } = getShiftLists(dayIndex);
+        if (!startList || !endList || !hoursList) {
           return;
         }
+        // Align first so the new row lands at the same position in all three.
+        balanceShiftLists(dayIndex);
         const nextIndex = startList.querySelectorAll(".shift-entry").length;
         const startEntry = buildShiftEntry(dayIndex, nextIndex, "start");
-        const endEntry = buildShiftEntry(dayIndex, nextIndex, "end");
         startList.appendChild(startEntry);
-        endList.appendChild(endEntry);
+        endList.appendChild(buildShiftEntry(dayIndex, nextIndex, "end"));
+        hoursList.appendChild(buildShiftEntry(dayIndex, nextIndex, "hours"));
         normalizeShiftIndexes(dayIndex);
         syncShiftControlStates();
         updateShiftHours(dayIndex);
@@ -2949,35 +3298,37 @@ body:not(.is-editing) .title-menu-toggle {
       };
 
       const removeShift = (dayIndex, shiftIndex) => {
-        const startList = document.querySelector(
-          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="start"]`
-        );
-        const endList = document.querySelector(
-          `.shift-list[data-day-index="${dayIndex}"][data-shift-side="end"]`
-        );
-        if (!startList || !endList) {
+        const { startList, endList, hoursList } = getShiftLists(dayIndex);
+        if (!startList || !endList || !hoursList) {
           return;
         }
-        const startEntry = startList.querySelector(
-          `.shift-entry[data-shift-index="${shiftIndex}"]`
-        );
-        const endEntry = endList.querySelector(
-          `.shift-entry[data-shift-index="${shiftIndex}"]`
-        );
-        if (startEntry && activePicker && startEntry.contains(activePicker)) {
+        // Align the columns first, then delete the same row position from each
+        // so a removal can never leave one column longer than the others.
+        balanceShiftLists(dayIndex);
+        const pos = parseInt(shiftIndex, 10);
+        if (Number.isNaN(pos)) {
+          return;
+        }
+        const startEntry = startList.querySelectorAll(".shift-entry")[pos];
+        const endEntry = endList.querySelectorAll(".shift-entry")[pos];
+        const hoursEntry = hoursList.querySelectorAll(".shift-entry")[pos];
+        if (
+          activePicker &&
+          (startEntry?.contains(activePicker) || endEntry?.contains(activePicker))
+        ) {
           closeActivePicker();
         }
         startEntry?.remove();
         endEntry?.remove();
+        hoursEntry?.remove();
 
         if (!startList.querySelector(".shift-entry")) {
-          const fallbackStart = buildShiftEntry(dayIndex, 0, "start");
-          const fallbackEnd = buildShiftEntry(dayIndex, 0, "end");
-          startList.appendChild(fallbackStart);
-          endList.appendChild(fallbackEnd);
+          startList.appendChild(buildShiftEntry(dayIndex, 0, "start"));
+          endList.appendChild(buildShiftEntry(dayIndex, 0, "end"));
+          hoursList.appendChild(buildShiftEntry(dayIndex, 0, "hours"));
         }
 
-        normalizeShiftIndexes(dayIndex);
+        balanceShiftLists(dayIndex);
         syncShiftControlStates();
         updateShiftHours(dayIndex);
       };
@@ -3078,6 +3429,7 @@ body:not(.is-editing) .title-menu-toggle {
 
       const hydrateAndInit = () => {
         hydrateShiftLists();
+        balanceAllDays();
         recalcAllDayHours();
       };
 
@@ -3244,4 +3596,3 @@ body:not(.is-editing) .title-menu-toggle {
   </script>
 </body>
 </html>
-

@@ -132,6 +132,7 @@ def build_rows(entries):
 
         start_entries = []
         end_entries = []
+        hour_entries = []
         day_total = Decimal("0")
 
         if not shifts:
@@ -147,6 +148,7 @@ def build_rows(entries):
             if hours_value is None:
                 hours_value = hours_from_span(raw_start, raw_end)
             day_total += hours_value
+            shift_hours_display = format_hours(hours_value)
 
             start_entries.append(
                 "<div class=\"shift-entry\" "
@@ -157,8 +159,6 @@ def build_rows(entries):
                 f"<input class=\"time-input\" type=\"time\" data-shift-input=\"start\" "
                 f"data-day-index=\"{index}\" data-shift-index=\"{shift_index}\" "
                 f"value=\"{raw_start}\">"
-                "<button type=\"button\" class=\"shift-remove\" "
-                f"data-day-index=\"{index}\" data-shift-index=\"{shift_index}\">&times;</button>"
                 "</div>"
             )
 
@@ -174,9 +174,21 @@ def build_rows(entries):
                 "</div>"
             )
 
-        total += day_total
-        hours_display = format_hours(day_total) if day_total else "0.00"
+            hour_entries.append(
+                "<div class=\"shift-entry shift-hours-entry\" "
+                f"data-day-index=\"{index}\" data-shift-index=\"{shift_index}\">"
+                f"<span data-shift-hours=\"true\" data-day-index=\"{index}\" "
+                f"data-shift-index=\"{shift_index}\">{shift_hours_display}</span>"
+                "<button type=\"button\" class=\"shift-remove\" "
+                f"data-day-index=\"{index}\" data-shift-index=\"{shift_index}\" "
+                "aria-label=\"Remove shift\" title=\"Remove shift\">"
+                "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\">"
+                "<path d=\"M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z\"/>"
+                "</svg></button>"
+                "</div>"
+            )
 
+        total += day_total
         rows.append(
             "<tr>"
             f"<td>{wrap_editable_value(day)}</td>"
@@ -192,8 +204,10 @@ def build_rows(entries):
             f"{''.join(end_entries)}"
             "</div>"
             "</td>"
-            f"<td class=\"hours\"><span data-day-hours=\"true\" data-hours-cell=\"true\" "
-            f"data-day-index=\"{index}\">{hours_display}</span></td>"
+            f"<td class=\"hours\"><div class=\"shift-list hours-list\" "
+            f"data-day-index=\"{index}\" data-shift-side=\"hours\">"
+            f"{''.join(hour_entries)}"
+            "</div></td>"
             "</tr>"
         )
 
@@ -247,7 +261,7 @@ def main() -> None:
         "-t",
         "--template",
         type=Path,
-        default=Path("timesheet_template (1).html"),
+        default=Path("timesheet_template.html"),
         help="Path to the HTML template file.",
     )
     parser.add_argument(
