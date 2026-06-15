@@ -1737,6 +1737,16 @@ body:not(.is-editing) .title-menu-toggle {
       overflow: visible !important;
     }
 
+    /* Fill the page by distributing the table's height across the day rows.
+       Chrome does this automatically via the flexbox stretch; Firefox/Safari
+       don't stretch flex items when printing, so we give the table a definite
+       fill height that every engine distributes to its rows identically.
+       Chrome's flex stretch still lets it grow further (stays flush), so this
+       only changes the non-Chrome browsers. Tuned for A3. */
+    body.page-a3 .timesheet-table {
+      min-height: 680px;
+    }
+
     .signatures {
       page-break-inside: avoid;
       display: grid;
