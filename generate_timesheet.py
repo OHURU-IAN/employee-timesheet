@@ -1,3 +1,9 @@
+# Employee Weekly Timesheet generator
+# Copyright (c) 2025-2026 Ian Ohuru (OHURU-IAN). All Rights Reserved.
+# PROPRIETARY AND CONFIDENTIAL. Unauthorized copying, reproduction, or reuse of
+# this code, in whole or in part, is prohibited. See the LICENSE file.
+# Contact: ohuruian@gmail.com
+
 import argparse
 import json
 from datetime import datetime
