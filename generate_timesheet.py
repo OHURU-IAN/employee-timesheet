@@ -191,8 +191,9 @@ def build_rows(entries):
         total += day_total
         rows.append(
             "<tr>"
-            f"<td>{wrap_editable_value(day)}</td>"
-            f"<td>{wrap_editable_value(date, f' data-date-cell=\"true\" data-day-offset=\"{index}\"')}</td>"
+            # Day-of-week and the derived date are fixed, so they are not editable.
+            f"<td><span class=\"day-name\">{day}</span></td>"
+            f"<td><span data-date-cell=\"true\" data-day-offset=\"{index}\">{date}</span></td>"
             f"<td>"
             f"<div class=\"shift-list\" data-day-index=\"{index}\" data-shift-side=\"start\">"
             f"{''.join(start_entries)}"

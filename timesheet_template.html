@@ -1785,7 +1785,6 @@ body:not(.is-editing) .title-menu-toggle {
 <body>
   <div class="controls">
     <button id="toggleEditing">Enable Editing</button>
-    <button id="togglePageSize" type="button">Use A3 Paper</button>
     <button id="printSheet">Print / Save as PDF</button>
   </div>
 
@@ -1908,7 +1907,7 @@ body:not(.is-editing) .title-menu-toggle {
           </div>
           <div class="row">
             <span class="label">Date:</span>
-            <span class="value"><span data-editable="true" data-signature-date="start">$employee_signature_date</span></span>
+            <span class="value"><span data-signature-date="start">$employee_signature_date</span></span>
           </div>
         </div>
         <div class="signature-card">
@@ -1928,7 +1927,7 @@ body:not(.is-editing) .title-menu-toggle {
           </div>
           <div class="row">
             <span class="label">Date:</span>
-            <span class="value"><span data-editable="true" data-signature-date="end">$supervisor_signature_date</span></span>
+            <span class="value"><span data-signature-date="end">$supervisor_signature_date</span></span>
           </div>
         </div>
       </section>
@@ -1985,7 +1984,7 @@ body:not(.is-editing) .title-menu-toggle {
         return styleEl;
       })();
 
-      let currentPageSize = "A4";
+      let currentPageSize = "A3";
 
       let weekDatePicker;
 
